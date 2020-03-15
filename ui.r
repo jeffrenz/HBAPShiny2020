@@ -9,6 +9,8 @@ library(dplyr)
 library(ggmap)
 
 library(RODBC)
+library(odbc)
+
 library(stringr)
 library(httr)
 
@@ -23,7 +25,7 @@ global_deaths <- comma(g_stats$TotalDeaths)
 global_recovered <- comma(g_stats$TotalRecovered)
 
 # World Health Organization 
-situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200313-sitrep-53-covid-19.pdf"
+situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200314-sitrep-54-covid-19.pdf"
 
 fluidPage(
   

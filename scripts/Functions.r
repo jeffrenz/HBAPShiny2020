@@ -3,24 +3,43 @@
 # 2020 Shiny Challenge
 
 library(RODBC)
+library(odbc)
 library(stringr)
 library(httr)
 
+library(DBI)
+#con <- dbConnect(odbc::odbc(), .connection_string = "Driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!", timeout = 10)
+
+
 # Virus database connection string
 get_database_connection_string <- function() {
+  #RODBC Windows
   virus_connection_string <- odbcDriverConnect('driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!;')
+  
+  #RODBC Linux
+  #virus_connection_string <-odbcDriverConnect(connection = "Driver=FreeTDS;TDS_Version=7.2;Server=lwjr.database.windows.net;Port=1433;Database=HBAP;Uid=shiny2020;Pwd=c0ronavirus_is_sc@ry!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;")
+  
+  #odbc
+  #virus_connection_string <- dbConnect(odbc::odbc(), .connection_string = "Driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!", timeout = 10)
   return(virus_connection_string)
 }
 
 # Get Global Stats
 get_global_stats <- function() {
-  #conn <-get_database_connection_string()
-  #global_stats_df <- sqlQuery(conn, "SELECT * FROM [dbo].[GlobalStats];")
+  conn <-get_database_connection_string()
+  
+  #RODBC
+  global_stats_df <- sqlQuery(conn, "SELECT * FROM [dbo].[GlobalStats];")
+  global_stats <- global_stats_df[c(1,3:1)]
+  close(conn)
+  
+  #ODBC
+  #global_stats_df <- dbGetQuery(conn, "SELECT * FROM [dbo].[GlobalStats];")
   #global_stats <- global_stats_df[c(1,3:1)]
-  #close(conn)
+  #dbDisconnect(conn)
   
   #hard code
-  global_stats <- list("TotalConfirmed" = 153584, "TotalDeaths" = 5790, "TotalRecovered" = 72587)
+  #global_stats <- list("TotalConfirmed" = 156400, "TotalDeaths" = 5833, "TotalRecovered" = 73968)
 
   return(global_stats)
   
@@ -111,7 +130,7 @@ insert_virus_stats <- function(p_row_id, p_col_id, p_debug=FALSE) {
     conn <- get_database_connection_string()
     
     # Execute SQL
-    sql_message <-sqlQuery(conn, sqlStatement)
+    sql_message <-dbGetQuery(conn, sqlStatement)
     
     if (length(sql_message)==0)
     {
@@ -123,7 +142,7 @@ insert_virus_stats <- function(p_row_id, p_col_id, p_debug=FALSE) {
     }
     
     # Close connection string
-    close(conn)
+    dbDisconnect(conn)
   }
   
 }
