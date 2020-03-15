@@ -1,0 +1,13 @@
+name: ShinnyCompetition2020
+title: ShinnyCompetition2020
+username:
+account: jeff-renz
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1868079
+bundleId: 2882111
+url: https://jeff-renz.shinyapps.io/ShinnyCompetition2020/
+when: 1584229829.04571
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data/2019-ncov-factsheet.pdf|data/20200301-sitrep-41-covid-19.pdf|data/Situation Report - 38.pdf|data/virus 2020_02_28.csv|data/virus.csv
