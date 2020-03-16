@@ -58,6 +58,20 @@ function(input, output, session) {
     updateSelectInput(session,"select_country_with_updateSelectInput",
                       choices = sort(unique(confirmed$Country.Region)))
     
+    output$covid_with_updateSelectInput <- renderPlot({
+      confirmed %>%
+        filter(
+          Country.Region == input$select_country_with_updateSelectInput
+        ) %>%
+        ggplot(aes(x=X3.14.20, y=X3.15.20))+
+        geom_path()+
+        labs(
+          title = paste("Confirmed cases between X3.14.20 and X3.15.20", "in",
+                        input$select_country_with_updateSelectInput),
+          subtitle = "Data source: https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases"
+        )
+    })
+    
     # Data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
    
     output$covid_virus <- renderDT({
