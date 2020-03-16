@@ -20,7 +20,9 @@ library(DT)
 # virusTable %>%
 #   View()
 
-confirmed <- read.csv("data/time_series_2019-ncov-Confirmed.csv")
+# confirmed <- read.csv("data/time_series_2019-ncov-Confirmed.csv")
+
+confirmed <- read.csv("data/Confirmed.csv")
 
 #map code from Ken
 points <- eventReactive(input$recalc, {
@@ -63,10 +65,10 @@ function(input, output, session) {
         filter(
           Country.Region == input$select_country_with_updateSelectInput
         ) %>%
-        ggplot(aes(x=X3.14.20, y=X3.15.20))+
-        geom_path()+
+        ggplot(aes(x=Value))+
+        geom_histogram()+
         labs(
-          title = paste("Confirmed cases between X3.14.20 and X3.15.20", "in",
+          title = paste("Confirmed cases by days in the last 3 months", "in",
                         input$select_country_with_updateSelectInput),
           subtitle = "Data source: https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases"
         )
@@ -77,8 +79,8 @@ function(input, output, session) {
     output$covid_virus <- renderDT({
       confirmed %>%
         # select(Country.Region, X3.13.20, X3.14.20, X3.15.20) %>%
-        select(Country.Region:X3.15.20) %>%
-        arrange(desc(X3.15.20)) %>%
+        select(Country.Region:Value) %>%
+        arrange(desc(Value)) %>%
         datatable(rownames=FALSE, extensions = "Responsive")
     })
     
