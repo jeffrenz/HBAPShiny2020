@@ -12,7 +12,6 @@ library(ggmap)
 library(stringr)
 library(httr)
 
-# library(kableExtra)
 library(DT)
 
 
@@ -101,6 +100,9 @@ fluidPage(
     #                "History Table" = "table",
     #                "Situation Report" = "who"))     
     
+    selectInput("select_country_with_updateSelectInput",
+                label = "Choose a country: ",
+                choices = NULL)
   ),
     
   mainPanel(
@@ -120,7 +122,6 @@ fluidPage(
         tabPanel("Interactive Map",leafletOutput("map", width = "100%", height =  700)),
         tabPanel("By The Numbers",
                  # htmlOutput("filetable"),
-                 # tableOutput("covid_virus"),
                  DTOutput("covid_virus")
                  ),
         tabPanel("Trend",
@@ -131,6 +132,7 @@ fluidPage(
                                      font-family: times;
                                      }"
           )),
+          plotOutput("covid_with_updateSelectInput")
         ),  
         tabPanel("Situation Report", 
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 
