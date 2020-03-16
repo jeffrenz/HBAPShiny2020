@@ -12,6 +12,8 @@ library(ggmap)
 library(stringr)
 library(httr)
 
+library(kableExtra)
+
 # Run functions.r script to load
 # rel_path_from_root <- "scripts/Functions.r"
 # source(rel_path_from_root)
@@ -76,6 +78,7 @@ fluidPage(
       )
     ),
     
+    # Updating input to pull the country data from the server.r
     selectInput("varCounty", 
                 label = "Choose a country",
                 choices = c("Singapore", 
@@ -88,6 +91,8 @@ fluidPage(
                             "United States",
                             "Australia"),
                 selected = "United States"),
+    
+    
     
     # radioButtons("varDisplay", "Display:",
     #              c("Interactive Map" = "interactive_map",
@@ -111,7 +116,8 @@ fluidPage(
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
         tabPanel("Interactive Map",leafletOutput("map", width = "100%", height =  700)),
-        tabPanel("By The Numbers",htmlOutput("filetable")),
+        tabPanel("By The Numbers",htmlOutput("filetable"),
+                 tableOutput("covid_virus")),
         tabPanel("Trend",
                  img(src='Coronavirus.JPG', align = "left", width = 150),
           textOutput("selected_country"),

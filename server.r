@@ -12,11 +12,57 @@ library(ggmap)
 library(stringr)
 library(httr)
 
+library(kableExtra)
+
 #library(png) # For writePNG function
+
+# virusTable <- read.csv("http://hgis.uw.edu/virus/assets/virus.csv")
+# virusTable %>%
+#   View()
+
+confirmed <- read.csv("data/time_series_2019-ncov-Confirmed.csv")
+
+#map code from Ken
+points <- eventReactive(input$recalc, {
+  cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
+}, ignoreNULL = FALSE)
+
+
+# Make a list of icons. We'll index into it based on name.
+oceanIcons <- iconList(
+  ship = makeIcon("ferry-18.png", "ferry-18@2x.png", 18, 18),
+  pirate = makeIcon("danger-24.png", "danger-24@2x.png", 24, 24)
+)
+
+# Some fake data
+df <- sp::SpatialPointsDataFrame(
+  cbind(
+    (runif(30) - .5) * 12 - 80.620130,  # lng
+    (runif(30) - .5) * 4.8 + 24.638077  # lat
+  ),
+  data.frame(type = factor(
+    ifelse(runif(30) > 0.75, "pirate", "ship"),
+    c("ship", "pirate")
+    
+  ))
+)
+
+# Create a palette that maps factor levels to colors
+pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+
+
 function(input, output, session) {
  
   observe({
-
+    
+    output$covid_virus <- function(){
+      confirmed %>%
+        select(Country.Region, X3.13.20, X3.14.20, X3.15.20) %>%
+        arrange(desc(X3.15.20))%>%
+        kable()
+    }
+    
+  
     output$text <- renderText({
       input$title
     })
@@ -56,55 +102,29 @@ function(input, output, session) {
     
     # output$filetable <- renderUI({selectedData()})  
     
-    # map code from Ken
-    # points <- eventReactive(input$recalc, {
-    #   cbind(rnorm(40) * 2 + 13, rnorm(40) + 48)
-    # }, ignoreNULL = FALSE)
-    # 
-    # 
-    # # Make a list of icons. We'll index into it based on name.
-    #  oceanIcons <- iconList(
-    #    ship = makeIcon("ferry-18.png", "ferry-18@2x.png", 18, 18),
-    #    pirate = makeIcon("danger-24.png", "danger-24@2x.png", 24, 24)
-    #  )
-    # 
-    # # Some fake data
-    # df <- sp::SpatialPointsDataFrame(
-    #   cbind(
-    #     (runif(30) - .5) * 12 - 80.620130,  # lng
-    #     (runif(30) - .5) * 4.8 + 24.638077  # lat
-    #   ),
-    #   data.frame(type = factor(
-    #     ifelse(runif(30) > 0.75, "pirate", "ship"),
-    #     c("ship", "pirate")
-    #     
-    #   ))
-    # )
-    # 
-    # # Create a palette that maps factor levels to colors
-    # pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+
     
     
-    
-    # output$map <- renderLeaflet({
-    #   # Put three lines of leaflet code here
-    #   leaflet(df) %>%
-    #     addTiles() %>%
-    #     ##addProviderTiles(providers$Stamen.TonerLite,
-    #     ##               options = providerTileOptions(noWrap = FALSE)
-    #     ##) %>%
-    #     # addMarkers()
-    #     ## addMarkers(data = points())
-    # 
-    #     # Select from oceanIcons based on df$type (need "gif")
-    #     ## addMarkers(icon = ~oceanIcons[type])
-    # 
-    #     addCircleMarkers(
-    #       radius = ~ifelse(type == "ship", 6, 10),
-    #       color = ~pal(type),
-    #       stroke = FALSE, fillOpacity = 0.5
-    #     )
-    # })
+    #map code from Ken    
+    output$map <- renderLeaflet({
+      # Put three lines of leaflet code here
+      leaflet(df) %>%
+        addTiles() %>%
+        ##addProviderTiles(providers$Stamen.TonerLite,
+        ##               options = providerTileOptions(noWrap = FALSE)
+        ##) %>%
+        # addMarkers()
+        ## addMarkers(data = points())
+
+        # Select from oceanIcons based on df$type (need "gif")
+        ## addMarkers(icon = ~oceanIcons[type])
+
+        addCircleMarkers(
+          radius = ~ifelse(type == "ship", 6, 10),
+          color = ~pal(type),
+          stroke = FALSE, fillOpacity = 0.5
+        )
+    })
     
   })
 
