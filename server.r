@@ -12,7 +12,8 @@ library(ggmap)
 library(stringr)
 library(httr)
 
-library(kableExtra)
+# library(kableExtra)
+library(DT)
 
 #library(png) # For writePNG function
 
@@ -56,13 +57,21 @@ function(input, output, session) {
   observe({
     
     # Data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
-    output$covid_virus <- function(){
+    # output$covid_virus <- function(){
+    #   confirmed %>%
+    #     select(Country.Region, X3.13.20, X3.14.20, X3.15.20) %>%
+    #     arrange(desc(X3.15.20))%>%
+    #     kable() %>%
+    #     kable_styling(bootstrap_options = c("striped", "hover"))
+    # }
+    
+    output$covid_virus <- renderDT({
       confirmed %>%
-        select(Country.Region, X3.13.20, X3.14.20, X3.15.20) %>%
-        arrange(desc(X3.15.20))%>%
-        kable() %>%
-        kable_styling(bootstrap_options = c("striped", "hover"))
-    }
+        # select(Country.Region, X3.13.20, X3.14.20, X3.15.20) %>%
+        select(Country.Region:X3.15.20) %>%
+        arrange(desc(X3.15.20)) %>%
+        datatable(rownames=FALSE, extensions = "Responsive")
+    })
     
   
     output$text <- renderText({
