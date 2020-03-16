@@ -56,7 +56,7 @@ function(input, output, session) {
   observe({
     
     updateSelectInput(session,"select_country_with_updateSelectInput",
-                      choices = unique(confirmed$Country.Region))
+                      choices = sort(unique(confirmed$Country.Region)))
     
     # Data from https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
    
