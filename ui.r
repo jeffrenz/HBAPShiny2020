@@ -4,25 +4,26 @@ library(htmlTable)
 library(scales)
 
 library(leaflet)
-library(spData)
+# library(spData)
 library(dplyr)
 library(ggmap)
 
-library(RODBC)
+# library(RODBC)
 library(stringr)
 library(httr)
 
 # Run functions.r script to load
-rel_path_from_root <- "scripts/Functions.r"
-source(rel_path_from_root)
+# rel_path_from_root <- "scripts/Functions.r"
+# source(rel_path_from_root)
 
 #Global Data
-g_stats <- get_global_stats()
-global_cases <- comma(g_stats$TotalConfirmed)
-global_deaths <- comma(g_stats$TotalDeaths)
-global_recovered <- comma(g_stats$TotalRecovered)
+# g_stats <- get_global_stats()
+# global_cases <- comma(g_stats$TotalConfirmed)
+# global_deaths <- comma(g_stats$TotalDeaths)
+# global_recovered <- comma(g_stats$TotalRecovered)
 
 # World Health Organization 
+# Let's link the file if needed from the data folder 20200313-sitrep-53-covid-19
 situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200313-sitrep-53-covid-19.pdf"
 
 fluidPage(
@@ -47,7 +48,7 @@ fluidPage(
                      ),               
                      column(width =2,
                             fluidRow(       
-                              p(global_cases, style = "font-family: 'times'; font-size:24px;color:black"),
+                              # p(global_cases, style = "font-family: 'times'; font-size:24px;color:black"),
                               p("Cases", style = "font-family: 'times'; font-size:12px;color:black"),
                             )
                      ),
@@ -56,7 +57,7 @@ fluidPage(
                      ),               
                      column(width =2,
                             fluidRow(       
-                              p(global_deaths, style = "font-family: 'times'; font-size:24px;color:black"),
+                              # p(global_deaths, style = "font-family: 'times'; font-size:24px;color:black"),
                               p("Deaths", style = "font-family: 'times'; font-size:12px;color:black"),
                             ),
                      ),
@@ -65,7 +66,7 @@ fluidPage(
                      ),               
                      column(width =2,
                             fluidRow(       
-                              p(global_recovered, style = "font-family: 'times'; font-size:24px;color:black"),
+                              # p(global_recovered, style = "font-family: 'times'; font-size:24px;color:black"),
                               p("Recovered", style = "font-family: 'times'; font-size:12px;color:black"),
                             ),
                      )                   
