@@ -14,6 +14,7 @@ library(httr)
 
 library(DT)
 
+
 #library(png) # For writePNG function
 
 # virusTable <- read.csv("http://hgis.uw.edu/virus/assets/virus.csv")
@@ -23,6 +24,12 @@ library(DT)
 # confirmed <- read.csv("data/time_series_2019-ncov-Confirmed.csv")
 
 confirmed <- read.csv("data/Confirmed.csv")
+
+# confirmed$Long <- as.numeric(confirmed$Long)
+# confirmed$Lat <- as.numeric(confirmed$Lat)
+# 
+# confirmed.sp <- sp::SpatialPointsDataFrame(confirmed[,c(3,4)], confirmed[,-c(3,4)])
+
 
 #map code from Ken
 points <- eventReactive(input$recalc, {
@@ -60,6 +67,7 @@ function(input, output, session) {
     updateSelectInput(session,"select_country_with_updateSelectInput",
                       choices = sort(unique(confirmed$Country.Region)))
     
+   
     output$covid_with_updateSelectInput <- renderPlot({
       if(input$update_chart == 0){
         return()
@@ -70,7 +78,7 @@ function(input, output, session) {
           Country.Region == isolate(input$select_country_with_updateSelectInput)
         ) %>%
         ggplot(aes(x=Value))+
-        geom_histogram()+
+        geom_histogram(binwidth = 40)+
         labs(
           title = paste("Confirmed cases by days in the last 3 months", "in",
                         isolate(input$select_country_with_updateSelectInput)),

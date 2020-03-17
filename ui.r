@@ -13,6 +13,7 @@ library(stringr)
 library(httr)
 
 library(DT)
+library(shinycustomloader)
 
 
 # Run functions.r script to load
@@ -140,12 +141,13 @@ fluidPage(
                                      }"
           )),
           actionButton("update_chart", label = "Update chart", width = "100%"),
-          plotOutput("covid_with_updateSelectInput")
+          withLoader(plotOutput("covid_with_updateSelectInput"))
         ),  
         tabPanel("Situation Report", 
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 
                               src=situatation_report_pdf))
         ),
+        
     ),    
   )
 )
