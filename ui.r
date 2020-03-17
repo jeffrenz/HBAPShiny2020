@@ -18,7 +18,7 @@ library(shinycustomloader)
 
 # Run functions.r script to load
 # rel_path_from_root <- "scripts/Functions.r"
-# source(rel_path_from_root)
+# source(rel_path_from_root, local = TRUE) #Let's move this line to server
 
 #Global Data
 # g_stats <- get_global_stats()
