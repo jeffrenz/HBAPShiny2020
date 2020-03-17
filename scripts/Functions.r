@@ -130,7 +130,7 @@ insert_virus_stats <- function(p_row_id, p_col_id, p_debug=FALSE) {
     conn <- get_database_connection_string()
     
     # Execute SQL
-    sql_message <-dbGetQuery(conn, sqlStatement)
+    sql_message <-sqlQuery(conn, sqlStatement)
     
     if (length(sql_message)==0)
     {
@@ -142,7 +142,7 @@ insert_virus_stats <- function(p_row_id, p_col_id, p_debug=FALSE) {
     }
     
     # Close connection string
-    dbDisconnect(conn)
+    close(conn)
   }
   
 }
