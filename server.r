@@ -69,13 +69,13 @@ function(input, output, session) {
       
       confirmed %>%
         filter(
-          Country.Region == input$select_country_with_updateSelectInput
+          Country.Region == isolate(input$select_country_with_updateSelectInput)
         ) %>%
         ggplot(aes(x=Value))+
         geom_histogram()+
         labs(
           title = paste("Confirmed cases by days in the last 3 months", "in",
-                        input$select_country_with_updateSelectInput),
+                        isolate(input$select_country_with_updateSelectInput)),
           subtitle = "Data source: https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases"
         )
     })
