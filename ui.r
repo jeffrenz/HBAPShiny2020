@@ -30,6 +30,7 @@ library(DT)
 situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200313-sitrep-53-covid-19.pdf"
 
 fluidPage(
+  theme = "custom.css",
   
   titlePanel(h1("HBAP Team Shiny")),
 
@@ -79,19 +80,19 @@ fluidPage(
       )
     ),
     
-    # Updating input to pull the country data from the server.r
-    selectInput("varCounty", 
-                label = "Choose a country",
-                choices = c("Singapore", 
-                            "Hong Kong",
-                            "Thailand", 
-                            "South Korea",
-                            "Japan",
-                            "Malaysia",
-                            "Thailand",
-                            "United States",
-                            "Australia"),
-                selected = "United States"),
+    # Updated input to pull the country data from the server.r
+    # selectInput("varCounty", 
+    #             label = "Choose a country",
+    #             choices = c("Singapore", 
+    #                         "Hong Kong",
+    #                         "Thailand", 
+    #                         "South Korea",
+    #                         "Japan",
+    #                         "Malaysia",
+    #                         "Thailand",
+    #                         "United States",
+    #                         "Australia"),
+    #             selected = "United States"),
     
     
     
@@ -100,6 +101,10 @@ fluidPage(
     #                "History Table" = "table",
     #                "Situation Report" = "who"))     
     
+    wellPanel(
+      h4("Coronavirus COVID-19 Global Cases"),
+      p("by Harvard Business Analytics Students")
+    ),
     selectInput("select_country_with_updateSelectInput",
                 label = "Choose a country: ",
                 choices = NULL)
@@ -119,7 +124,9 @@ fluidPage(
       #conditionalPanel(condition = "input.varDisplay == 'interactive_map'", leafletOutput("map")),
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
-        tabPanel("Interactive Map",leafletOutput("map", width = "100%", height =  700)),
+        tabPanel("Interactive Map",
+                 leafletOutput("map", width = "100%", height =  700)
+                 ),
         tabPanel("By The Numbers",
                  # htmlOutput("filetable"),
                  DTOutput("covid_virus")
