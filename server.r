@@ -61,6 +61,12 @@ function(input, output, session) {
                       choices = sort(unique(confirmed$Country.Region)))
     
     output$covid_with_updateSelectInput <- renderPlot({
+      print(input$update_chart)
+      
+      if(input$update_chart == 0){
+        return()
+      }
+      
       confirmed %>%
         filter(
           Country.Region == input$select_country_with_updateSelectInput

@@ -132,6 +132,7 @@ fluidPage(
                                      font-family: times;
                                      }"
           )),
+          actionButton("update_chart", label = "Update chart", width = "100%"),
           plotOutput("covid_with_updateSelectInput")
         ),  
         tabPanel("Situation Report", 
