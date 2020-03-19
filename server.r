@@ -13,6 +13,7 @@ library(stringr)
 library(httr)
 
 library(DT)
+library(sf)
 
 
 #library(png) # For writePNG function
@@ -141,7 +142,8 @@ function(input, output, session) {
       # Put three lines of leaflet code here
       leaflet() %>%
         addTiles() %>%
-        addCircleMarkers(data = confirmed)
+        addMarkers(data = confirmed)
+        # addCircleMarkers(data = confirmed)
         ##addProviderTiles(providers$Stamen.TonerLite,
         ##               options = providerTileOptions(noWrap = FALSE)
         ##) %>%
