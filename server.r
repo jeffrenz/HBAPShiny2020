@@ -47,6 +47,10 @@ function(input, output, session) {
     output$selected_country <- renderText({ 
       paste("", input$varCounty)
     }) 
+
+    output$selected_country_table_header <- renderText({ 
+      paste("", input$varCounty)
+    }) 
     
     output$selected_display <- renderText({ 
       paste("", input$varDisplay)
@@ -67,31 +71,45 @@ function(input, output, session) {
       g1_name="Confirmed"
       g2_name="Deaths&dagger;"
       
+      current_stats_by_country <- get_current_stats_by_country()
+      current_stats_by_country <- current_stats_by_country[current_stats_by_country$Country_Region==input$varCounty,]
+      
       tmp <- HTML(
-        htmlTable(matrix(paste("Data ", LETTERS[1:16]), 
-                         ncol=4, byrow = TRUE),
-                  header =  paste(c("Total", "New",
-                                    "Total", "New"), ""),
-                  rnames = paste(c("Mar-13", "Mar-12",
-                                   "Mar-13", "Mar-12"), ""),
-                  rgroup = c("Colorado",
-                             "Washington"),
-                  n.rgroup = c(2,2),
-                  cgroup = c(g1_name, g2_name),
-                  n.cgroup = c(2,2), 
-                  caption="Source: http://hgis.uw.edu/virus/assets/virus.csv",
-                  tfoot="&dagger; Placeholder") 
+        htmlTable(current_stats_by_country) 
       )
       tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
       tmp <- gsub('<table', '<table style="width:600px"; ', tmp)
       tmp
-    })
+      
+      
+      
+      # tmp <- HTML(
+      #   htmlTable(matrix(paste("Data ", LETTERS[1:16]), 
+      #                    ncol=4, byrow = TRUE),
+      #             header =  paste(c("Total", "New",
+      #                               "Total", "New"), ""),
+      #             rnames = paste(c("Mar-13", "Mar-12",
+      #                              "Mar-13", "Mar-12"), ""),
+      #             rgroup = c("Colorado",
+      #                        "Washington"),
+      #             n.rgroup = c(2,2),
+      #             cgroup = c(g1_name, g2_name),
+      #             n.cgroup = c(2,2), 
+      #             caption="Source: http://hgis.uw.edu/virus/assets/virus.csv",
+      #             tfoot="&dagger; Placeholder") 
+      # )
+      # tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
+      # tmp <- gsub('<table', '<table style="width:600px"; ', tmp)
+      # tmp
+    
+      
+      })
     
     output$filetable <- renderUI({selectedData()})  
     
     # Get Map Data
     map_stats <- get_map_stats()
-    coordinates(map_stats) <- ~Long+Lat
+    #coordinates(map_stats) <- ~Long+Lat
 
     pal <- colorFactor(c("red", "orange","yellow"), domain = c( "large", "medium","small"))
     
@@ -132,8 +150,7 @@ function(input, output, session) {
                   colour = 'black', hjust = 0.5, vjust = -1) +
         theme(axis.text.x = element_text(angle=45, hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.5))
-      p_2 <- p_2 + ggtitle(virus_plot_title) + xlab("Source: Humdata") + ylab("COVID-19 New Cases")
-      #p_2 <- labs(title=virus_plot_title,x ="Humdata Report Date", y = "COVID-19 New Cases")
+      p_2 <- p_2 + ggtitle(virus_plot_title) + xlab("https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases") + ylab("COVID-19 New Cases")
       p_2
     })   
         

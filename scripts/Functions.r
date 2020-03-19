@@ -6,7 +6,7 @@ library(RODBC)
 library(odbc)
 library(stringr)
 library(httr)
-
+library(plyr) 
 library(DBI)
 
 # World Health Organization Situation Report
@@ -15,10 +15,10 @@ situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/s
 # Virus database connection string
 get_database_connection_string <- function() {
   #RODBC Windows
-  virus_connection_string <- odbcDriverConnect('driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!;')
+  #virus_connection_string <- odbcDriverConnect('driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!;')
   
   #RODBC Linux
-  #virus_connection_string <-odbcDriverConnect(connection = "Driver=FreeTDS;TDS_Version=7.2;Server=lwjr.database.windows.net;Port=1433;Database=HBAP;Uid=shiny2020;Pwd=c0ronavirus_is_sc@ry!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;")
+  virus_connection_string <-odbcDriverConnect(connection = "Driver=FreeTDS;TDS_Version=7.2;Server=lwjr.database.windows.net;Port=1433;Database=HBAP;Uid=shiny2020;Pwd=c0ronavirus_is_sc@ry!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;")
   
   #odbc
   #virus_connection_string <- dbConnect(odbc::odbc(), .connection_string = "Driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!", timeout = 10)
@@ -46,9 +46,24 @@ get_map_stats <- function() {
   
   #RODBC
   map_stats_df <- sqlQuery(conn, "EXEC dbo.selInfectionMapCountry;")
+  coordinates(map_stats_df) <- ~Long+Lat
   close(conn)
   
   return(map_stats_df)
+}
+
+# Current Totals by Country
+get_current_stats_by_country <- function() {
+  conn <-get_database_connection_string()
+
+  #RODBC
+  current_stats_by_country_df <- sqlQuery(conn, "EXEC dbo.selInfectionMapCountry;")
+  close(conn)
+  
+  keepcolumns <- c("CountryOrRegion", "CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths")
+  current_stats_by_country_df <-subset(current_stats_by_country_df, select = keepcolumns)
+  current_stats_by_country_df <-rename(current_stats_by_country_df,c("CityOrStateOrProvince" = "State_Province", "CountryOrRegion" = "Country_Region", "ConfirmedCases" = "Cases"))
+  return(current_stats_by_country_df)
 }
 
 # Data for Trend Graph
@@ -78,4 +93,6 @@ get_global_stats <- function() {
 # Get Data
 #map_stats <- get_map_stats()
 #coordinates(map_stats) <- ~Long+Lat
-trend_df <- get_trend_data('us')
+#trend_df <- get_trend_data('us')
+#cs <- get_current_stats_by_country()
+#head(cs)

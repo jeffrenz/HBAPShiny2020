@@ -102,8 +102,19 @@ fluidPage(
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
         tabPanel("Interactive Map",leafletOutput("map", width = "auto", height =  800)),
-        tabPanel("By The Numbers",htmlOutput("filetable")),
+        tabPanel("By The Numbers",
+                 fluidRow(
+                 img(src='Coronavirus.JPG', align = "left", width = 90),
+                 textOutput("selected_country_table_header"),
+                 tags$head(tags$style("#selected_country_table_header{color: darkorange;
+                                     font-size: 40px;
+                                     font-family: times;
+                                     }"
+                 )),
+                 ),
+                 withLoader(htmlOutput("filetable"))),
         tabPanel("Trend",
+                 fluidRow(
                  img(src='Coronavirus.JPG', align = "left", width = 90),
           textOutput("selected_country"),
           tags$head(tags$style("#selected_country{color: darkorange;
@@ -111,8 +122,9 @@ fluidPage(
                                      font-family: times;
                                      }"
           )),
-          #actionButton("update_chart", label = "Update chart", width = "100"),
-          withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
+                #actionButton("update_chart", label = "Update chart", width = "100"),
+                 ),
+                withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
         ),  
         tabPanel("Situation Report", 
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 
