@@ -14,18 +14,12 @@ library(odbc)
 library(stringr)
 library(httr)
 
-# Run functions.r script to load
-rel_path_from_root <- "scripts/Functions.r"
-source(rel_path_from_root)
+library(DT)
+library(shinycustomloader)
 
-#Global Data
-g_stats <- get_global_stats()
-global_cases <- comma(g_stats$TotalConfirmed)
-global_deaths <- comma(g_stats$TotalDeaths)
-global_recovered <- comma(g_stats$TotalRecovered)
 
-# World Health Organization 
-situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200314-sitrep-54-covid-19.pdf"
+#data for side panel
+countries <-get_countries()
 
 fluidPage(
   
@@ -34,18 +28,19 @@ fluidPage(
   #titlePanel(color = "blue", title = "HBAP Team Shiny", inverted = TRUE)
   sidebarPanel(
     fluidRow(
-    img(src='CoronavirusTitle.JPG', align = "left", width = 325),
+    img(src='Coronavirus_header.jfif', align = "left", width = "575px"),
     br()
     ),
     fluidRow(
       column(width = 12,
+        br(),
         p("Globally", style = "font-family: 'times'; font-size:30px;color:darkorange"),
         fluidRow(
             column(width =12,
                    fluidRow
                    (
                      column(width =2,
-                            img(src='Confirmed.JPG', align = "left")
+                            img(src='emoji-surgical-mask.png', align = "left", width="50px")
                      ),               
                      column(width =2,
                             fluidRow(       
@@ -54,42 +49,37 @@ fluidPage(
                             )
                      ),
                      column(width =2,
-                            img(src='Deaths.JPG', align = "left")              
-                     ),               
-                     column(width =2,
-                            fluidRow(       
-                              p(global_deaths, style = "font-family: 'times'; font-size:24px;color:black"),
-                              p("Deaths", style = "font-family: 'times'; font-size:12px;color:black"),
-                            ),
-                     ),
-                     column(width =2,
-                            img(src='Recovered.JPG', align = "left")              
+                            img(src='recovered.png', align = "left", width="50px")              
                      ),               
                      column(width =2,
                             fluidRow(       
                               p(global_recovered, style = "font-family: 'times'; font-size:24px;color:black"),
                               p("Recovered", style = "font-family: 'times'; font-size:12px;color:black"),
                             ),
-                     )                   
+                     ),
+                     column(width =2,
+                            img(src='emoji-dead-emoticon.png', align = "left", width = "50px")              
+                     ),               
+                     column(width =2,
+                            fluidRow(       
+                              p(global_deaths, style = "font-family: 'times'; font-size:24px;color:black"),
+                              p("Deaths", style = "font-family: 'times'; font-size:12px;color:black"),
+                            ),
+                     )                     
                    ),
             )
         ),
       )
     ),
-    
+    br(),
     selectInput("varCounty", 
                 label = "Choose a country",
-                choices = c("Singapore", 
-                            "Hong Kong",
-                            "Thailand", 
-                            "South Korea",
-                            "Japan",
-                            "Malaysia",
-                            "Thailand",
-                            "United States",
-                            "Australia"),
-                selected = "United States"),
+                choices = countries,
+                selected = "US"),
     
+    # selectInput("select_country_with_updateSelectInput",
+    #             label = "Choose a country SQL: ",
+    #             choices = NULL),
     # radioButtons("varDisplay", "Display:",
     #              c("Interactive Map" = "interactive_map",
     #                "History Table" = "table",
@@ -111,16 +101,18 @@ fluidPage(
       #conditionalPanel(condition = "input.varDisplay == 'interactive_map'", leafletOutput("map")),
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
-        tabPanel("Interactive Map",leafletOutput("map", width = "100%", height =  700)),
+        tabPanel("Interactive Map",leafletOutput("map", width = "auto", height =  600)),
         tabPanel("By The Numbers",htmlOutput("filetable")),
         tabPanel("Trend",
-                 img(src='Coronavirus.JPG', align = "left", width = 150),
+                 img(src='Coronavirus.JPG', align = "left", width = 90),
           textOutput("selected_country"),
           tags$head(tags$style("#selected_country{color: darkorange;
                                      font-size: 40px;
                                      font-family: times;
                                      }"
           )),
+          #actionButton("update_chart", label = "Update chart", width = "100"),
+          withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
         ),  
         tabPanel("Situation Report", 
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 

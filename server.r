@@ -13,12 +13,35 @@ library(odbc)
 
 library(stringr)
 library(httr)
+library(jpeg)
+
+library(sp)
+# Run functions.r script to load
+rel_path_from_root <- "scripts/Functions.r"
+source(rel_path_from_root)
+
+#data
+confirmed <- read.csv("data/Confirmed.csv")
+mydata=read.csv("data/bikes.csv")
+
+#Get Global Data for Dashboard
+g_stats <- get_global_stats()
+global_cases <- comma(g_stats$TotalConfirmed)
+global_deaths <- comma(g_stats$TotalDeaths)
+global_recovered <- comma(g_stats$TotalRecovered)
+
+# Get Data
+map_stats <- get_map_stats()
+coordinates(map_stats) <- ~Long+Lat
 
 #library(png) # For writePNG function
 function(input, output, session) {
  
   observe({
 
+    updateSelectInput(session,"select_country_with_updateSelectInput",
+                      choices = sort(unique(confirmed$Country.Region)))
+    
     output$text <- renderText({
       input$title
     })
@@ -31,6 +54,16 @@ function(input, output, session) {
       paste("", input$varDisplay)
     }) 
     
+    # output$selected_country_graph <- renderText({ 
+    #   #mydata=read.csv("data/bikes.csv")
+    #   confirmed <- read.csv("data/Confirmed.csv")
+    #   paste("", input$varCounty)
+    # })     
+
+    output$selected_country_table <- renderText({ 
+      paste("", input$varCounty)
+    })
+        
     selectedData <- reactive({  
       # Create the table (using table from htmlTables doc as example)
       g1_name="Confirmed"
@@ -84,30 +117,62 @@ function(input, output, session) {
     )
     
     # Create a palette that maps factor levels to colors
-    pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
-    
-    
+    # pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+    pal <- colorFactor(c("green", "navy", "red"), domain = c("small", "medium", "large"))
     
     output$map <- renderLeaflet({
       # Put three lines of leaflet code here
-      leaflet(df) %>%
+      #leaflet(df) %>%
+      leaflet(map_stats) %>% 
         addTiles() %>%
-        ##addProviderTiles(providers$Stamen.TonerLite,
-        ##               options = providerTileOptions(noWrap = FALSE)
-        ##) %>%
-        # addMarkers()
-        ## addMarkers(data = points())
-        
-        # Select from oceanIcons based on df$type (need "gif")
-        ## addMarkers(icon = ~oceanIcons[type])
-        
-        addCircleMarkers(
-          radius = ~ifelse(type == "ship", 6, 10),
+      
+          addCircleMarkers(
+          ##radius = ~ifelse(type == "ship", 6, 10),
           color = ~pal(type),
           stroke = FALSE, fillOpacity = 0.5
         )
     })  
+
+    output$covid_plot_by_country <- renderPlot({
+      # if(input$update_chart == 0){
+      #   return()
+      # }
+      my_image=readJPEG("www/stop_virus.jpeg")
+      #my_image=readJPEG("www/StaySafe.jpg")
+      
+      sc_graph <- paste("", input$varDisplay)
+      virus_plot_title <- paste0(input$varCounty," Confirmed New Cases Last 14 Days")
+      
+      # Set up a plot with correct labels and dimensions and apply background image 
+      hist(mydata$Count, main=virus_plot_title, xlab = "Date", ylab = "Number of Cases")
+      lim <- par()
+      rasterImage(my_image, lim$usr[1], lim$usr[3], lim$usr[2], lim$usr[4])
+      
+      # Plot actual data
+      par(new=TRUE)
+      hist(mydata$Count,col=rgb(0.1,0.1,0.1,0.15), main=virus_plot_title, xlab = "Date", ylab = "Number of Cases")
+    })    
     
+    output$covid_with_updateSelectInput <- renderPlot({
+      if(input$update_chart == 0){
+        return()
+      }
+      
+      confirmed %>%
+        filter(
+          Country.Region == isolate(input$varCounty)
+        ) %>%
+        ggplot(aes(x=Value))+
+        geom_histogram(binwidth = 40)+
+        labs(
+          title = paste("Confirmed cases by days in the last 3 months", "in",
+                        isolate(input$select_country_with_updateSelectInput)),
+          subtitle = "Data source: https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases"
+        )
+    })    
+    
+    
+        
   })
 
     
