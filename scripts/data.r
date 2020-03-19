@@ -132,10 +132,9 @@ insert_virus_stats_humdata(1,18,TRUE)
 # i Columns that represent the date
 # j rows that represent the area that is effected
 
-days_back <- 1 # 0 is today
+days_back <- 0 # 0 is today
 #i <-5 # start of historic data
 #i <-col_count_humdata - days_back
-i <-18  # load starting Feb 4
 j <- 1
 
 while (i<=col_count_humdata-days_back )

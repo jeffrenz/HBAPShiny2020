@@ -101,7 +101,7 @@ fluidPage(
       #conditionalPanel(condition = "input.varDisplay == 'interactive_map'", leafletOutput("map")),
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
-        tabPanel("Interactive Map",leafletOutput("map", width = "auto", height =  600)),
+        tabPanel("Interactive Map",leafletOutput("map", width = "auto", height =  800)),
         tabPanel("By The Numbers",htmlOutput("filetable")),
         tabPanel("Trend",
                  img(src='Coronavirus.JPG', align = "left", width = 90),
