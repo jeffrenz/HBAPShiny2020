@@ -136,14 +136,12 @@ function(input, output, session) {
     
     # output$filetable <- renderUI({selectedData()})  
     
-
-    
-    
-    #map code from Ken    
+  
     output$map <- renderLeaflet({
       # Put three lines of leaflet code here
-      leaflet(df) %>%
+      leaflet() %>%
         addTiles() %>%
+        addCircleMarkers(data = confirmed)
         ##addProviderTiles(providers$Stamen.TonerLite,
         ##               options = providerTileOptions(noWrap = FALSE)
         ##) %>%
@@ -153,11 +151,11 @@ function(input, output, session) {
         # Select from oceanIcons based on df$type (need "gif")
         ## addMarkers(icon = ~oceanIcons[type])
 
-        addCircleMarkers(
-          radius = ~ifelse(type == "ship", 6, 10),
-          color = ~pal(type),
-          stroke = FALSE, fillOpacity = 0.5
-        )
+        # addCircleMarkers(
+        #   radius = ~ifelse(type == "ship", 6, 10),
+        #   color = ~pal(type),
+        #   stroke = FALSE, fillOpacity = 0.5
+        # )
     })
     
   })
