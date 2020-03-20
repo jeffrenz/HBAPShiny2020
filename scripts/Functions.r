@@ -8,7 +8,7 @@ library(stringr)
 library(httr)
 library(plyr) 
 library(DBI)
-
+library(dplyr)
 # World Health Organization Situation Report
 situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200318-sitrep-58-covid-19.pdf"
 
@@ -51,19 +51,27 @@ get_map_stats <- function() {
   
   return(map_stats_df)
 }
-
-# Current Totals by Country
-get_current_stats_by_country <- function() {
+# Get data for "By the Numbers" tab
+get_current_stats_by_state_province <- function() {
   conn <-get_database_connection_string()
 
   #RODBC
-  current_stats_by_country_df <- sqlQuery(conn, "EXEC dbo.selInfectionMapCountry;")
+  current_stats_by_state_province_df <- sqlQuery(conn, "EXEC dbo.selInfectionMapCountry;")
   close(conn)
-  
-  keepcolumns <- c("CountryOrRegion", "CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths")
-  current_stats_by_country_df <-subset(current_stats_by_country_df, select = keepcolumns)
-  current_stats_by_country_df <-rename(current_stats_by_country_df,c("CityOrStateOrProvince" = "State_Province", "CountryOrRegion" = "Country_Region", "ConfirmedCases" = "Cases"))
-  return(current_stats_by_country_df)
+  keepcolumns <- c("CountryOrRegion","CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths")
+  current_stats_by_state_province_df <- subset(current_stats_by_state_province_df, select=keepcolumns)
+  names(current_stats_by_state_province_df) <- c("Country_Region", "State_Province","Cases","Recovered","Deaths")
+  return(current_stats_by_state_province_df)
+}
+
+# Get Data for Side Bar Box Plot
+get_current_stats_by_country_region <- function() {
+  conn <-get_database_connection_string()
+
+  #RODBC
+  current_stats_by_country_region_df <- sqlQuery(conn, "EXEC dbo.selInfectionHumdataCurrentTotals;")
+  close(conn)
+  return(current_stats_by_country_region_df)
 }
 
 # Data for Trend Graph
@@ -90,9 +98,14 @@ get_global_stats <- function() {
 #print(global_stats$TotalConfirmed)
 }
 
+
+
+
 # Get Data
 #map_stats <- get_map_stats()
 #coordinates(map_stats) <- ~Long+Lat
 #trend_df <- get_trend_data('us')
-#cs <- get_current_stats_by_country()
-#head(cs)
+cs <- get_current_stats_by_state_province()
+head(cs)
+
+

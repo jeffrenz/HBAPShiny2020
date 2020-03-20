@@ -18,6 +18,7 @@ library(png)
 library(grid)
 #library(ggimage)
 library(sp)
+
 # Run functions.r script to load
 rel_path_from_root <- "scripts/Functions.r"
 source(rel_path_from_root)
@@ -26,11 +27,7 @@ source(rel_path_from_root)
 #confirmed <- read.csv("data/Confirmed.csv")
 #mydata=read.csv("data/bikes.csv")
 
-#Get Global Data for Dashboard
-g_stats <- get_global_stats()
-global_cases <- comma(g_stats$TotalConfirmed)
-global_deaths <- comma(g_stats$TotalDeaths)
-global_recovered <- comma(g_stats$TotalRecovered)
+
 
 #library(png) # For writePNG function
 function(input, output, session) {
@@ -55,33 +52,26 @@ function(input, output, session) {
     output$selected_display <- renderText({ 
       paste("", input$varDisplay)
     }) 
-    
-    # output$selected_country_graph <- renderText({ 
-    #   #mydata=read.csv("data/bikes.csv")
-    #   confirmed <- read.csv("data/Confirmed.csv")
-    #   paste("", input$varCounty)
-    # })     
 
     output$selected_country_table <- renderText({ 
       paste("", input$varCounty)
     })
         
     selectedData <- reactive({  
-      # Create the table (using table from htmlTables doc as example)
-      g1_name="Confirmed"
-      g2_name="Deaths&dagger;"
       
-      current_stats_by_country <- get_current_stats_by_country()
-      current_stats_by_country <- current_stats_by_country[current_stats_by_country$Country_Region==input$varCounty,]
+      current_stats_by_state_province <- get_current_stats_by_state_province()
+      current_stats_by_state_province <- current_stats_by_state_province[current_stats_by_state_province$Country_Region==input$varCounty,]
       
       tmp <- HTML(
-        htmlTable(current_stats_by_country) 
+        htmlTable(current_stats_by_state_province) 
       )
       tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
       tmp <- gsub('<table', '<table style="width:600px"; ', tmp)
       tmp
       
-      
+      # Create the table (using table from htmlTables doc as example)
+      #g1_name="Confirmed"
+      #g2_name="Deaths&dagger;"
       
       # tmp <- HTML(
       #   htmlTable(matrix(paste("Data ", LETTERS[1:16]), 
@@ -101,7 +91,6 @@ function(input, output, session) {
       # tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
       # tmp <- gsub('<table', '<table style="width:600px"; ', tmp)
       # tmp
-    
       
       })
     
@@ -109,16 +98,15 @@ function(input, output, session) {
     
     # Get Map Data
     map_stats <- get_map_stats()
-    #coordinates(map_stats) <- ~Long+Lat
 
     pal <- colorFactor(c("red", "orange","yellow"), domain = c( "large", "medium","small"))
     
     output$map <- renderLeaflet({
       # Put three lines of leaflet code here
       #leaflet(df) %>%
+      leaflet(options = leafletOptions(zoomControl = TRUE))
       leaflet(map_stats) %>% 
         addTiles() %>%
-      
           addCircleMarkers(
           radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 5)),
           color = ~pal(type),
@@ -153,7 +141,29 @@ function(input, output, session) {
       p_2 <- p_2 + ggtitle(virus_plot_title) + xlab("https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases") + ylab("COVID-19 New Cases")
       p_2
     })   
-        
+
+    output$covid_plot_by_cases <- renderPlot({
+      
+      #my_image=readJPEG("www/stop_virus.jpeg")
+      
+      #sc_graph <- paste("", input$varDisplay)
+      
+      
+      # Get Data
+      current_stats_by_country_region_df <- get_current_stats_by_country_region()
+      current_stats_by_country_region_df <- head(current_stats_by_country_region_df, 10)
+      
+      p_cases <- ggplot(current_stats_by_country_region_df, aes(x = reorder(current_stats_by_country_region_df$CountryOrRegion, current_stats_by_country_region_df$TotalConfirmedCases)   , y = current_stats_by_country_region_df$TotalConfirmedCases))+
+        geom_bar(stat="identity", fill = "black", position = "dodge", width = .75, colour = 'black', alpha = 0.1) +
+        scale_y_continuous('', limits = c(0, max(current_stats_by_country_region_df$TotalConfirmedCases) + max(current_stats_by_country_region_df$TotalConfirmedCases)/6)) +
+        geom_text(aes(label = comma(current_stats_by_country_region_df$TotalConfirmedCases), ymax = 0), size = 5, fontface = 2,
+                  colour = 'red', hjust = -0.25, vjust = 0.3) 
+      
+        p_cases <-  p_cases+ theme(axis.text.x = element_blank(),panel.background = element_rect(fill = "white"),plot.background = element_rect(fill = "white"),panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +labs(x = "", y = "")
+      #p_cases+ theme_void()+ coord_flip()
+      p_cases + coord_flip()
+
+    })         
   })
 
     

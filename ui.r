@@ -17,12 +17,19 @@ library(httr)
 library(DT)
 library(shinycustomloader)
 
+# Run functions.r script to load
+rel_path_from_root <- "scripts/Functions.r"
+source(rel_path_from_root)
 
 #data for side panel
 countries <-get_countries()
+g_stats <- get_global_stats()
+global_cases <- comma(g_stats$TotalConfirmed)
+global_deaths <- comma(g_stats$TotalDeaths)
+global_recovered <- comma(g_stats$TotalRecovered)
+
 
 fluidPage(
-  
   titlePanel(h1("HBAP Team Shiny")),
 
   #titlePanel(color = "blue", title = "HBAP Team Shiny", inverted = TRUE)
@@ -84,7 +91,7 @@ fluidPage(
     #              c("Interactive Map" = "interactive_map",
     #                "History Table" = "table",
     #                "Situation Report" = "who"))     
-    
+    withLoader(plotOutput("covid_plot_by_cases",width = "550px", height = "430px")),
   ),
     
   mainPanel(
@@ -101,7 +108,7 @@ fluidPage(
       #conditionalPanel(condition = "input.varDisplay == 'interactive_map'", leafletOutput("map")),
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
-        tabPanel("Interactive Map",leafletOutput("map", width = "auto", height =  800)),
+        tabPanel("World Map",leafletOutput("map", width = "auto", height =  800)),
         tabPanel("By The Numbers",
                  fluidRow(
                  img(src='Coronavirus.JPG', align = "left", width = 90),
@@ -125,11 +132,20 @@ fluidPage(
                 #actionButton("update_chart", label = "Update chart", width = "100"),
                  ),
                 withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
-        ),  
+                ),  
         tabPanel("Situation Report", 
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 
-                              src=situatation_report_pdf))
-        ),
+                              src=situatation_report_pdf)
+                 ),
+        
+      tabPanel("Top 15 Countries",
+               #withLoader(plotOutput("covid_plot_by_cases",width = "575px"))
+               )
+      
+    ),
+      
+      
+      
     ),    
   )
 )
