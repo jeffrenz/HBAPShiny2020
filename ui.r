@@ -33,14 +33,19 @@ situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/s
 fluidPage(
   theme = "custom.css",
   
-  titlePanel(h1("HBAP Team Shiny")),
+  
+  fluidRow(
+    titlePanel(div("HBAP Team Shiny",
+    img(src='CoronavirusTitle.JPG', height=105,width = 300)))
+    # br()
+  ),
+    # titlePanel(div("Fenologische modellen", 
+    #                img(height = 105, width = 300, src = "logo_pcfruit.jpg"))
+   
 
   #titlePanel(color = "blue", title = "HBAP Team Shiny", inverted = TRUE)
   sidebarPanel(
-    fluidRow(
-    img(src='CoronavirusTitle.JPG', align = "left", width = 325),
-    br()
-    ),
+    
     fluidRow(
       column(width = 12,
         p("Globally", style = "font-family: 'times'; font-size:30px;color:darkorange"),
