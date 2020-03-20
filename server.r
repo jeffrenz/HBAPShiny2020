@@ -58,7 +58,9 @@ df <- sp::SpatialPointsDataFrame(
 )
 
 # Create a palette that maps factor levels to colors
-pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+# pal <- colorFactor(c("navy", "red"), domain = c("ship", "pirate"))
+
+pal <- colorFactor(c("red", "orange","yellow"), domain = c( "large", "medium","small"))
 
 
 function(input, output, session) {
@@ -137,8 +139,23 @@ function(input, output, session) {
     
     # output$filetable <- renderUI({selectedData()})  
     
-  
+    
+    
     output$map <- renderLeaflet({
+      # Put three lines of leaflet code here
+      #leaflet(df) %>%
+      leaflet(confirmed, options = leafletOptions(zoomControl = TRUE)) %>% 
+        addTiles() #%>%
+        
+        # addCircleMarkers(
+        #   radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 5)),
+        #   color = ~pal(type),
+        #   stroke = FALSE, fillOpacity = 0.5
+        # )
+    }) 
+    
+  
+    output$map1 <- renderLeaflet({
       # Put three lines of leaflet code here
       leaflet() %>%
         addTiles() %>%
