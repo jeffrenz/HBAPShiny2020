@@ -123,7 +123,7 @@ insert_virus_stats_humdata <- function(p_row_id, p_col_id, p_debug=FALSE) {
 }
 
 # Test Examples
-insert_virus_stats_humdata(1,18,TRUE)
+#insert_virus_stats_humdata(1,18,TRUE)
 #insert_virus_stats_humdata(237,59,TRUE) #has special character ' in string
 #insert_virus_stats_humdata(191,59,TRUE) #has special character * in string
 
@@ -134,7 +134,7 @@ insert_virus_stats_humdata(1,18,TRUE)
 
 days_back <- 0 # 0 is today
 #i <-5 # start of historic data
-#i <-col_count_humdata - days_back
+i <-col_count_humdata - days_back
 j <- 1
 
 while (i<=col_count_humdata-days_back )

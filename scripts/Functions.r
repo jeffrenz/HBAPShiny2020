@@ -85,6 +85,18 @@ get_trend_data <- function(pCountry) {
   return(trend_df)
 }
 
+# Data for Current Totals by country  selInfectionHumdataCurrentTotalsForCountry
+get_current_totals_for_country <- function(pCountry) {
+  conn <-get_database_connection_string()
+  
+  #RODBC
+  sql <- paste0("EXEC [dbo].[selInfectionHumdataCurrentTotalsForCountry] @pCountry = '",pCountry,"';")
+  current_totals_for_country_df <- sqlQuery(conn, sql)
+  close(conn)
+  return(current_totals_for_country_df)
+}
+
+
 # Data for Global Totals
 get_global_stats <- function() {
   conn <-get_database_connection_string()
@@ -105,7 +117,7 @@ get_global_stats <- function() {
 #map_stats <- get_map_stats()
 #coordinates(map_stats) <- ~Long+Lat
 #trend_df <- get_trend_data('us')
-cs <- get_current_stats_by_state_province()
-head(cs)
-
+#cs <- get_current_stats_by_state_province()
+#head(cs)
+#zipdata <- allzips[sample.int(nrow(allzips), 10000),]
 
