@@ -144,10 +144,11 @@ function(input, output, session) {
           addCircleMarkers(
           radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 5)),
           color = ~pal(type),
-          stroke = FALSE, fillOpacity = 0.5
+          stroke = FALSE, fillOpacity = 0.5,
+          popup = ~paste("Confirmed Cases: ", ConfirmedCases, "<br/>", "Recovered: ", Recovered, "<br/>", "Deaths: ", Deaths)
+          
         ) %>%
-        #addLegend("bottomleft", pal=pal, values=c("low (1-100)","medium (100-1000)","high >10000"), title="Severity",
-        #          layerId="colorLegend") %>%
+
         setView(lng = -93.85, lat = 37.45, zoom = 4)
     })
     
@@ -169,47 +170,20 @@ function(input, output, session) {
     # This observer is responsible for maintaining the circles and legend,
     # according to the variables the user has chosen to map to color and size.
     
-    observe({
-      colorBy <- "superzip"
-      sizeBy <- "superzip"
-      threshold <- 0.05
-      
-      colorData <- ifelse(zipdata$centile >= (100 - threshold), "yes", "no")
-      pal <- colorFactor("viridis", colorData)
-      radius <- ifelse(zipdata$centile >= (100 - threshold), 30000, 3000)
-     
-      # leafletProxy("map", data = zipdata) %>%
-      #   clearShapes() %>%
-      #   addCircles(~longitude, ~latitude, radius=radius, layerId=~zipcode,
-      #              stroke=FALSE, fillOpacity=0.4, fillColor=pal(colorData)) 
-    })
+    # observe({
+    #   colorBy <- "superzip"
+    #   sizeBy <- "superzip"
+    #   threshold <- 0.05
+    #   
+    #   colorData <- ifelse(zipdata$centile >= (100 - threshold), "yes", "no")
+    #   pal <- colorFactor("viridis", colorData)
+    #   radius <- ifelse(zipdata$centile >= (100 - threshold), 30000, 3000)
+    # 
+    # })
     
-    # Show a popup at the given location
-    showZipcodePopup <- function(zipcode, lat, lng) {
-      selectedZip <- allzips[allzips$zipcode == zipcode,]
-      content <- as.character(tagList(
-        tags$h4("Score:", as.integer(selectedZip$centile)),
-        tags$strong(HTML(sprintf("%s, %s %s",
-             selectedZip$city.x, selectedZip$state.x, selectedZip$zipcode
-        ))), tags$br(),
-        sprintf("Median household income: %s", dollar(selectedZip$income * 1000)), tags$br(),
-        sprintf("Percent of adults with BA: %s%%", as.integer(selectedZip$college)), tags$br(),
-        sprintf("Adult population: %s", selectedZip$adultpop)
-      ))
-      leafletProxy("map") %>% addPopups(lng, lat, content, layerId = zipcode)
-    }
+
     
-    # When map is clicked, show a popup with city info
-    observe({
-      leafletProxy("map") %>% clearPopups()
-      event <- input$map_shape_click
-      if (is.null(event))
-        return()
-      
-      isolate({
-        showZipcodePopup(event$id, event$lat, event$lng)
-      })
-    }) 
+ 
       
 
     ## plot In Trend Tab ###########################################

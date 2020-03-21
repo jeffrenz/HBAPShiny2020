@@ -29,7 +29,6 @@ global_deaths <- comma(g_stats$TotalDeaths)
 global_recovered <- comma(g_stats$TotalRecovered)
 
 fluidPage(
-  #titlePanel(h1("HBAP Team Shiny")),
   titlePanel(
     fluidRow(
       column(3,
@@ -67,7 +66,7 @@ fluidPage(
                         ),
                  ),
                  column(1,
-                        img(src='emoji-dead-emoticon.png', align = "right", width = "50px")
+                        img(src='death.png', align = "right", width = "50px")
                  ),
                  column(1,
                         fluidRow(
@@ -75,7 +74,7 @@ fluidPage(
                           tags$style(type="text/css", "#country_deaths_total {font-family: 'times'; font-size:28px;color:black}"),
                         ),
                         fluidRow(
-                          p("Death", style = "font-family: 'times'; font-size:12px;color:black"),
+                          p("Deaths", style = "font-family: 'times'; font-size:12px;color:black"),
                         ),
                  ),
                ),
@@ -91,46 +90,22 @@ fluidPage(
     ),
     fluidRow(
         withLoader(plotOutput("covid_plot_by_cases")),
+    ),
+    fluidRow(
+      br(),
+    wellPanel(
+      h4("HBAP Team Shiny"),
+      h6("Jeff Renz, Itauma Itauma and Ken Cutt")
+    ),
     )
   , width=2),
     
   mainPanel(
-    # fluidRow(
-    #   textOutput("selected_country"),
-    #   tags$head(tags$style("#selected_country{color: darkorange;
-    #                              font-size: 40px;
-    #                              font-family: times;
-    #                              }"
-    #   )),
-    # ),
     fluidRow(
-      #conditionalPanel(condition = "input.varDisplay == 'who'", img(src='DistributionMap.JPG', align = "center")),
-      #conditionalPanel(condition = "input.varDisplay == 'interactive_map'", leafletOutput("map")),
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
         tabPanel("World Map",
-                 leafletOutput("map", width = "auto", height =  800),
-                 # div(class="outer",
-                 #     tags$head(
-                 #       # Include our custom CSS
-                 #       includeCSS("styles.css"),
-                 #       includeScript("gomap.js")
-                 #     ),                
-                     
-                     # If not using custom CSS, set height of leafletOutput to a number instead of percent
-                     #leafletOutput("map", width="auto", height=800),                
-
-                     
-                     # Shiny versions prior to 0.11 should use class = "modal" instead.
-                     # absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-                     #               draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
-                     #               width = 330, height = "auto",                  
-                     
-                                   
-
-                 #,leafletOutput("map", width = "auto", height =  800)
-                 #),
-                 #),
+                 leafletOutput("map", width = "auto", height =  625),
         ),
         tabPanel("By The Numbers",
                  br(),
@@ -143,11 +118,12 @@ fluidPage(
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 
                               src=situatation_report_pdf)
                  ),
-        
       tabPanel("What I Should Know",
                img(src='Coronavirus_usa_today.png', align = "left"),
-               #withLoader(plotOutput("covid_plot_by_cases",width = "575px"))
-               )
+               ),
+      tabPanel("Why Flatten The Curve?",
+               img(src='flattening-the-curve_orig.png', align = "left",width = "auto", height = "600px"),
+      )
       
     ),
     )    
