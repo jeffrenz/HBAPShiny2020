@@ -23,10 +23,10 @@ source(rel_path_from_root)
 
 #data for side panel
 countries <-get_countries()
-g_stats <- get_global_stats()
-global_cases <- comma(g_stats$TotalConfirmed)
-global_deaths <- comma(g_stats$TotalDeaths)
-global_recovered <- comma(g_stats$TotalRecovered)
+
+
+# World Health Organization Situation Report
+situatation_report_pdf <- get_situatation_report_pdf()
 
 fluidPage(
   titlePanel(
@@ -114,9 +114,10 @@ fluidPage(
                  br(),
                 withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
                 ),  
-        tabPanel("Situation Report", 
+        tabPanel("Situation Report",
                   tags$iframe(style="height:700px; width:100%; scrolling=yes", 
-                              src=situatation_report_pdf)
+                              src=situatation_report_pdf),
+                 textOutput("situation_report_name"),
                  ),
       tabPanel("What I Should Know",
                img(src='Coronavirus_usa_today.png', align = "left"),

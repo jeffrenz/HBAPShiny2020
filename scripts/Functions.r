@@ -9,8 +9,6 @@ library(httr)
 library(plyr) 
 library(DBI)
 library(dplyr)
-# World Health Organization Situation Report
-situatation_report_pdf <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200319-sitrep-59-covid-19.pdf"
 
 # Virus database connection string
 get_database_connection_string <- function() {
@@ -24,6 +22,22 @@ get_database_connection_string <- function() {
   #virus_connection_string <- dbConnect(odbc::odbc(), .connection_string = "Driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!", timeout = 10)
   return(virus_connection_string)
 }
+
+# PDF name for WHO Situation Report
+get_situatation_report_pdf <- function() {
+  conn <-get_database_connection_string()
+  
+  #RODBC
+  SituatationReportPDF_df <- sqlQuery(conn, "EXEC dbo.selSituationReportName")
+  situatation_report_name <- SituatationReportPDF_df$SituatationReportPDF
+  close(conn)
+  
+  #hard code
+  #situatation_report_name <-"https://www.who.int/docs/default-source/coronaviruse/situation-reports/20200319-sitrep-59-covid-19.pdf"
+  
+  return(situatation_report_name)
+}
+
 
 # Data for Country drop down menu
 get_countries <- function() {
@@ -58,9 +72,9 @@ get_current_stats_by_state_province <- function() {
   #RODBC
   current_stats_by_state_province_df <- sqlQuery(conn, "EXEC dbo.selInfectionMapCountry;")
   close(conn)
-  keepcolumns <- c("CountryOrRegion","CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths")
+  keepcolumns <- c("CountryOrRegion","CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths","CFR")
   current_stats_by_state_province_df <- subset(current_stats_by_state_province_df, select=keepcolumns)
-  names(current_stats_by_state_province_df) <- c("Country_Region", "State_Province","Cases","Recovered","Deaths")
+  names(current_stats_by_state_province_df) <- c("Country_Region", "State_Province","Cases","Recovered","Deaths","CFR")
   return(current_stats_by_state_province_df)
 }
 
@@ -113,11 +127,5 @@ get_global_stats <- function() {
 
 
 
-# Get Data
-#map_stats <- get_map_stats()
-#coordinates(map_stats) <- ~Long+Lat
-#trend_df <- get_trend_data('us')
-#cs <- get_current_stats_by_state_province()
-#head(cs)
-#zipdata <- allzips[sample.int(nrow(allzips), 10000),]
+
 

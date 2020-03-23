@@ -137,7 +137,7 @@ days_back <- 0 # 0 is today
 i <-col_count_humdata - days_back
 j <- 1
 
-while (i<=col_count_humdata-days_back )
+while (i<=col_count_humdata )
 {
   while (j<=row_count_humdata)
   {

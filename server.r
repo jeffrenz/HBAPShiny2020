@@ -16,33 +16,17 @@ library(httr)
 library(jpeg)
 library(png)
 library(grid)
-#library(ggimage)
 library(sp)
-
-#for hover
-# library(RColorBrewer)
-# library(scales)
-# library(lattice)
-
-
-
-# Leaflet bindings are a bit slow; for now we'll just sample to compensate
-set.seed(100)
-zipdata <- allzips[sample.int(nrow(allzips), 10000),]
-
-# By ordering by centile, we ensure that the (comparatively rare) SuperZIPs
-# will be drawn last and thus be easier to see
-zipdata <- zipdata[order(zipdata$centile),]
 
 # Run functions.r script to load
 rel_path_from_root <- "scripts/Functions.r"
 source(rel_path_from_root)
 
-#data
-#confirmed <- read.csv("data/Confirmed.csv")
-#mydata=read.csv("data/bikes.csv")
-
-
+# Global Stats
+g_stats <- get_global_stats()
+global_cases <- comma(g_stats$TotalConfirmed)
+global_deaths <- comma(g_stats$TotalDeaths)
+global_recovered <- comma(g_stats$TotalRecovered)
 
 #library(png) # For writePNG function
 function(input, output, session) {
@@ -64,6 +48,12 @@ function(input, output, session) {
     })
     output$selected_country_total <- renderText({ 
       paste("", input$varCounty)
+    })
+    
+    # WHO Situtaion Report Name
+    output$situation_report_name <- renderText({ 
+      report_name <-get_situatation_report_pdf()
+      paste("", report_name)
     })
     
     # Render more output
@@ -134,8 +124,6 @@ function(input, output, session) {
     ## Interactive map ###########################################
     
     output$map <- renderLeaflet({
-      #leaflet(options = leafletOptions(zoomControl = TRUE))
-      #leaflet(map_stats) %>% 
       leaflet(map_stats) %>% 
         addTiles(
           urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
@@ -145,11 +133,15 @@ function(input, output, session) {
           radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 5)),
           color = ~pal(type),
           stroke = FALSE, fillOpacity = 0.5,
-          popup = ~paste("Confirmed Cases: ", ConfirmedCases, "<br/>", "Recovered: ", Recovered, "<br/>", "Deaths: ", Deaths)
+          popup = ~paste("Confirmed Cases: ", comma(ConfirmedCases), "<br/>", "Recovered: ", comma(Recovered), "<br/>", "Deaths: ", comma(Deaths), "<br/>", "CFR: ", CFR)
           
         ) %>%
-
-        setView(lng = -93.85, lat = 37.45, zoom = 4)
+        setView(lng = -93.85, lat = 37.45, zoom = 4) %>%
+        addLegend("bottomleft", 
+                                colors =c( "yellow","orange","red"),
+                                labels= c("0-100", "101-1,000","1,000+"),
+                                title= "Confirmed Cases",
+                                opacity = 1)
     })
     
     # A reactive expression that returns the set of zips that are
