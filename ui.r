@@ -34,7 +34,45 @@ fluidPage(
       column(3,
              img(src='CoronavirusTitleOrange.jpg', align = "center", width = "400"),
       ),
-      column(7,
+      column(3,
+             fluidRow(
+               textOutput("global_header"),
+               tags$style(type="text/css", "#global_header {font-family: 'Bradley Hand ITC'; font-size:50px;font-weight: bold;color:darkorange}"),
+             ),
+             fluidRow(
+               column(1,offset = 1,
+                      img(src='earthMask.jpg', align = "right", width="60px")
+               ),
+               column(1,
+                      fluidRow(
+                        textOutput("global_cases"),
+                        tags$style(type="text/css", "#global_cases {font-family: 'times'; font-size:28px;color:black}"),
+                      ),
+                      fluidRow(
+                        p("Cases", style = "font-family: 'times'; font-size:12px;color:black"),
+                      ),
+               ),
+               column(2,offset=2,
+                      fluidRow(
+                        textOutput("global_deaths"),
+                        tags$style(type="text/css", "#global_deaths {font-family: 'times'; font-size:28px;color:red}"),
+                      ),
+                      fluidRow(
+                        p("Deaths", style = "font-family: 'times'; font-size:12px;color:red"),
+                      ),
+               ), 
+               column(2,offset=1,
+                      fluidRow(
+                        textOutput("global_cfr"),
+                        tags$style(type="text/css", "#global_cfr {font-family: 'times'; font-size:28px;color:black}"),
+                      ),
+                      fluidRow(
+                        p("CFR", style = "font-family: 'times'; font-size:12px;color:black"),
+                      ),
+               ),
+             ),
+      ),      
+      column(5,
              fluidRow(
                textOutput("selected_country_total"),
                tags$style(type="text/css", "#selected_country_total {font-family: 'Bradley Hand ITC'; font-size:50px;font-weight: bold;color:darkorange}"),
@@ -53,34 +91,36 @@ fluidPage(
                        p("Cases", style = "font-family: 'times'; font-size:12px;color:black"),
                         ),
                        ),
-                 column(1,
-                        img(src='recovered.png', align = "right", width="50px")
-                 ),
-                 column(1,
+               # column(1,offset = 1,
+               #        img(src='death.png', align = "right", width = "50px")
+               # ),
+               column(1,offset = 1,
+                      fluidRow(
+                        textOutput("country_deaths_total"),
+                        tags$style(type="text/css", "#country_deaths_total {font-family: 'times'; font-size:28px;color:red}"),
+                      ),
+                      fluidRow(
+                        p("Deaths", style = "font-family: 'times'; font-size:12px;color:red"),
+                      ),
+               ),               
+                 # column(1,offset = 1,
+                 #        img(src='percent.jpg', align = "right", width="50px")
+                 # ),
+                 column(1,offset = 1,
                         fluidRow(
-                          textOutput("country_recovered_total"),
-                          tags$style(type="text/css", "#country_recovered_total {font-family: 'times'; font-size:28px;color:black}"),
+                          textOutput("country_recovered_cfr"),
+                          tags$style(type="text/css", "#country_recovered_cfr {font-family: 'times'; font-size:28px;color:black}"),
                         ),
                         fluidRow(
-                          p("Recovered", style = "font-family: 'times'; font-size:12px;color:black"),
+                          p("CFR", style = "font-family: 'times'; font-size:12px;color:black"),
                         ),
                  ),
-                 column(1,
-                        img(src='death.png', align = "right", width = "50px")
-                 ),
-                 column(1,
-                        fluidRow(
-                          textOutput("country_deaths_total"),
-                          tags$style(type="text/css", "#country_deaths_total {font-family: 'times'; font-size:28px;color:black}"),
-                        ),
-                        fluidRow(
-                          p("Deaths", style = "font-family: 'times'; font-size:12px;color:black"),
-                        ),
-                 ),
-               ),
+
+          ),
       ),
     ),
   ),
+
   sidebarPanel(
     fluidRow(
               selectInput("varCounty", 
@@ -114,15 +154,18 @@ fluidPage(
                  br(),
                 withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
                 ),  
-        tabPanel("Situation Report",
-                  tags$iframe(style="height:700px; width:100%; scrolling=yes", 
+        tabPanel("Situation Report (WHO)",
+                  tags$iframe(style="height:625px; width:75%; scrolling=yes", 
                               src=situatation_report_pdf),
                  textOutput("situation_report_name"),
                  ),
-      tabPanel("What I Should Know",
+        tabPanel("Health Map (Kinsa)",
+                 htmlOutput("kinsa_iframe"),
+        ),
+        tabPanel("What I Should Know",
                img(src='Coronavirus_usa_today.png', align = "left"),
                ),
-      tabPanel("Why Flatten The Curve?",
+        tabPanel("Why Flatten The Curve?",
                img(src='flattening-the-curve_orig.png', align = "left",width = "auto", height = "600px"),
       )
       

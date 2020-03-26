@@ -18,6 +18,9 @@ library(png)
 library(grid)
 library(sp)
 
+library(shinydashboard)
+library(plotly)
+
 # Run functions.r script to load
 rel_path_from_root <- "scripts/Functions.r"
 source(rel_path_from_root)
@@ -27,12 +30,37 @@ g_stats <- get_global_stats()
 global_cases <- comma(g_stats$TotalConfirmed)
 global_deaths <- comma(g_stats$TotalDeaths)
 global_recovered <- comma(g_stats$TotalRecovered)
+global_cfr <- g_stats$CFR
+# External URLs
+url_kinsa <<- "https://healthweather.us/"
 
 #library(png) # For writePNG function
 function(input, output, session) {
- 
+   
   observe({
 
+    # global Totals
+    output$global_header <- renderText({
+      "World Wide"
+    })
+    output$global_cases <- renderText({ 
+      global_cases_df <-get_global_stats()
+      paste("", comma(global_cases_df$TotalConfirmed))
+    })
+    output$global_deaths <- renderText({ 
+      global_cases_df <-get_global_stats()
+      paste("", comma(global_cases_df$TotalDeaths))
+    })
+    output$global_cfr <- renderText({ 
+      global_cases_df <-get_global_stats()
+      paste("", global_cases_df$CFR)
+    })    
+    output$global_recovered <- renderText({ 
+      global_cases_df <-get_global_stats()
+      paste("", comma(global_cases_df$TotalRecovered))
+    })
+    
+    
     # Country Virus Totals
     output$country_cases_total <- renderText({ 
       totals_for_country_df <-get_current_totals_for_country(input$varCounty)
@@ -46,15 +74,28 @@ function(input, output, session) {
       totals_for_country_df <-get_current_totals_for_country(input$varCounty)
       paste("", comma(totals_for_country_df$TotalRecovered))
     })
+    output$country_recovered_cfr <- renderText({ 
+      totals_for_country_df <-get_current_totals_for_country(input$varCounty)
+      paste("", totals_for_country_df$CFR)
+    })    
     output$selected_country_total <- renderText({ 
       paste("", input$varCounty)
     })
+    
     
     # WHO Situtaion Report Name
     output$situation_report_name <- renderText({ 
       report_name <-get_situatation_report_pdf()
       paste("", report_name)
     })
+    
+    # Kinsa
+    output$kinsa_iframe <- renderUI({
+      iframe <- tags$iframe(src=url_kinsa, height=625, width="75%")
+      print(iframe)
+      iframe
+    })
+    
     
     # Render more output
     output$text <- renderText({
@@ -119,7 +160,7 @@ function(input, output, session) {
     # Get Map Data
     map_stats <- get_map_stats()
 
-    pal <- colorFactor(c("red", "orange","yellow"), domain = c( "large", "medium","small"))
+    pal <- colorFactor(c("red", "orange","gray"), domain = c( "large", "medium","small"))
     
     ## Interactive map ###########################################
     
@@ -130,52 +171,33 @@ function(input, output, session) {
           attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'         
         ) %>%
           addCircleMarkers(
-          radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 5)),
+          radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 10)),
           color = ~pal(type),
           stroke = FALSE, fillOpacity = 0.5,
-          popup = ~paste("Confirmed Cases: ", comma(ConfirmedCases), "<br/>", "Recovered: ", comma(Recovered), "<br/>", "Deaths: ", comma(Deaths), "<br/>", "CFR: ", CFR)
+          popup = ~paste(GeographyKey,"<hr>","Confirmed Cases: ", comma(ConfirmedCases), "<br/>", "Deaths: ", comma(Deaths), "<br/>", "CFR: ", CFR)
           
         ) %>%
-        setView(lng = -93.85, lat = 37.45, zoom = 4) %>%
+        setView(lng = -93.85, lat = 37.45, zoom = 5) %>%
+        #setView(lng = -33.85, lat = 27.45, zoom = 3) %>%
         addLegend("bottomleft", 
-                                colors =c( "yellow","orange","red"),
+                                colors =c("gray","orange","red"),
                                 labels= c("0-100", "101-1,000","1,000+"),
                                 title= "Confirmed Cases",
                                 opacity = 1)
     })
     
-    # A reactive expression that returns the set of zips that are
-    # in bounds right now
-    zipsInBounds <- reactive({
-      if (is.null(input$map_bounds))
-        return(zipdata[FALSE,])
-      bounds <- input$map_bounds
-      latRng <- range(bounds$north, bounds$south)
-      lngRng <- range(bounds$east, bounds$west)
-      subset(zipdata,
-             latitude >= latRng[1] & latitude <= latRng[2] &
-               longitude >= lngRng[1] & longitude <= lngRng[2])
-      
-    })    
-    
 
-    # This observer is responsible for maintaining the circles and legend,
-    # according to the variables the user has chosen to map to color and size.
-    
-    # observe({
-    #   colorBy <- "superzip"
-    #   sizeBy <- "superzip"
-    #   threshold <- 0.05
-    #   
-    #   colorData <- ifelse(zipdata$centile >= (100 - threshold), "yes", "no")
-    #   pal <- colorFactor("viridis", colorData)
-    #   radius <- ifelse(zipdata$centile >= (100 - threshold), 30000, 3000)
-    # 
-    # })
-    
-
-    
- 
+    output$over_nutrient <- renderValueBox({
+      # nutrition_df <- dv_df() %>% 
+      #   # filter(NutrientID %in% c(601, 204, 307, 269, 0)) %>% 
+      #   tidyr::drop_na(pct_dv) %>% filter(pct_dv > 100)
+      # if(nrow(nutrition_df) > 0){
+      #   valueBox("Over Daily Value", HTML(paste0(nutrition_df$Nutrient, sep="<br>")), icon = icon("exclamation-triangle"), color = "red")
+      # } else {
+      #   valueBox("All nutrients", "below recommended DV", icon = icon("exclamation-triangle"), color = "green")
+      # }
+      valueBox("All nutrients", "below recommended DV", icon = icon("exclamation-triangle"), color = "green", width=5)
+    })
       
 
     ## plot In Trend Tab ###########################################

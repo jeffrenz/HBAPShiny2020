@@ -44,7 +44,7 @@ get_countries <- function() {
   conn <-get_database_connection_string()
   
   #RODBC
-  countries_df <- sqlQuery(conn, "SELECT DISTINCT CountryOrRegion FROM dbo.Geography")
+  countries_df <- sqlQuery(conn, "SELECT DISTINCT CountryOrRegion FROM dbo.Geography WHERE RS LIKE 'https://github.com/CSSEGISandData/COVID-19' ORDER BY CountryOrRegion")
   countries <- countries_df$CountryOrRegion
   close(conn)
 
@@ -116,16 +116,18 @@ get_global_stats <- function() {
   conn <-get_database_connection_string()
   
   #RODBC
-  global_stats_df <- sqlQuery(conn, "SELECT * FROM [dbo].[GlobalStats];")
-  global_stats <- global_stats_df[c(1,3:1)]
+  global_stats_df <- sqlQuery(conn, "EXEC dbo.selInfectionHumdataGlobalTotals;")
+  #global_stats <- global_stats_df[c(1,3:1)]
   close(conn)
-  return(global_stats)
+  return(global_stats_df)
   
 #print(global_stats$TotalConfirmed)
 }
 
-
-
-
+# gs <- get_global_stats()
+# 
+# 
+# d=Sys.Date()-1#as.Date('2010-01-01')
+# format(d, "%m-%d-%Y")
 
 

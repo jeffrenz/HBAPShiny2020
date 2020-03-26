@@ -6,7 +6,6 @@ library(RODBC)
 library(odbc)
 library(stringr)
 library(httr)
-
 library(DBI)
 
 # Run functions.r script to load
@@ -14,8 +13,11 @@ rel_path_from_root <- "scripts/Functions.r"
 source(rel_path_from_root)
 
 # Get Data From https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases
-virus_humdata_confirmed <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Confirmed.csv&filename=time_series_2019-ncov-Confirmed.csv"))
-virus_humdata_death <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Deaths.csv&filename=time_series_2019-ncov-Deaths.csv"))
+#virus_humdata_confirmed <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Confirmed.csv&filename=time_series_2019-ncov-Confirmed.csv"))
+#virus_humdata_death <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Deaths.csv&filename=time_series_2019-ncov-Deaths.csv"))
+
+virus_humdata_confirmed <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_confirmed_global.csv&filename=time_series_covid19_confirmed_global.csv"))
+virus_humdata_death <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_covid19_deaths_global.csv&filename=time_series_covid19_deaths_global.csv"))
 virus_humdata_recovered <- read.csv(url("https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Recovered.csv&filename=time_series_2019-ncov-Recovered.csv"))
 
 row_count_humdata <- nrow(virus_humdata_confirmed)
@@ -68,22 +70,28 @@ insert_virus_stats_humdata <- function(p_row_id, p_col_id, p_debug=FALSE) {
   
   #Get Cases
   virus_cases <- toString(virus_humdata_confirmed[p_row_id,p_col_id])
+  if (virus_cases == 'NA') {virus_cases=0}
   if (p_debug) {
     print(paste0("Virus cases: ", virus_cases))
-  }
-
+  } 
+  
   #Get Deaths
   virus_deaths <- toString(virus_humdata_death[p_row_id,p_col_id])
+  if (virus_deaths == 'NA') {virus_deaths=0}
   if (p_debug) {
     print(paste0("Virus deaths: ", virus_deaths))
   }
   
   #Get Recovered
-  virus_recovered <- toString(virus_humdata_recovered[p_row_id,p_col_id])
-  if (p_debug) {
-    print(paste0("Virus recovered: ", virus_recovered))
-  }
+  virus_recovered = 0
+  #virus_recovered <- toString(virus_humdata_recovered[p_row_id,p_col_id])
+  #if (virus_recovered == 'NA') {virus_recovered=0}
+  #if (p_debug) {
+  #  print(paste0("Virus recovered: ", virus_recovered))
+  #}
+  
 
+  
   # SQL Statement to insert data
   sqlStatement <-paste("EXEC [dbo].[prcLoadInfectionDetailsHumdata]"
                        , paste("@pProvinceState = ",virus_province_state,",",sep="")
@@ -123,21 +131,23 @@ insert_virus_stats_humdata <- function(p_row_id, p_col_id, p_debug=FALSE) {
 }
 
 # Test Examples
-#insert_virus_stats_humdata(1,18,TRUE)
+#insert_virus_stats_humdata(1,61,TRUE)
 #insert_virus_stats_humdata(237,59,TRUE) #has special character ' in string
 #insert_virus_stats_humdata(191,59,TRUE) #has special character * in string
+#insert_virus_stats_humdata(210,66,FALSE) #has 'NA' in string
+
 
 
 # loop through data and insert into HBAP database
 # i Columns that represent the date
 # j rows that represent the area that is effected
 
-days_back <- 0 # 0 is today
+days_back <- 7 # 0 is today
 #i <-5 # start of historic data
 i <-col_count_humdata - days_back
 j <- 1
 
-while (i<=col_count_humdata )
+while (i>5)
 {
   while (j<=row_count_humdata)
   {
@@ -147,7 +157,7 @@ while (i<=col_count_humdata )
     j <- j+1
   }
   j <-1
-  i <-i+1
+  i <-i-1
 }
 
 
