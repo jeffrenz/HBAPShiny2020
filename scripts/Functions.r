@@ -9,6 +9,17 @@ library(httr)
 library(plyr) 
 library(DBI)
 library(dplyr)
+library(extrafont)
+
+# Load Extra Fonts
+#font_import()
+
+# This will show more detailed information about fonts
+#fonttable()
+
+#loadfonts()
+# If you want to output to .ps files instead of .pdf, use:
+# loadfonts(device="postscript")
 
 # Virus database connection string
 get_database_connection_string <- function() {
@@ -66,15 +77,16 @@ get_map_stats <- function() {
   return(map_stats_df)
 }
 # Get data for "By the Numbers" tab
-get_current_stats_by_state_province <- function() {
+get_current_stats_by_state_province <- function(pCountry) {
   conn <-get_database_connection_string()
 
   #RODBC
-  current_stats_by_state_province_df <- sqlQuery(conn, "EXEC dbo.selInfectionMapCountry;")
+  sql <- paste0("EXEC [dbo].[selInfectionHumdataCurrentTotalsForStateProvince] @pCountry = '",pCountry,"';")
+  current_stats_by_state_province_df <- sqlQuery(conn, sql)
   close(conn)
-  keepcolumns <- c("CountryOrRegion","CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths","CFR")
-  current_stats_by_state_province_df <- subset(current_stats_by_state_province_df, select=keepcolumns)
-  names(current_stats_by_state_province_df) <- c("Country_Region", "State_Province","Cases","Recovered","Deaths","CFR")
+  #keepcolumns <- c("CountryOrRegion","CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths","CFR")
+  #current_stats_by_state_province_df <- subset(current_stats_by_state_province_df, select=keepcolumns)
+  #names(current_stats_by_state_province_df) <- c("Country_Region", "State_Province","Cases","Recovered","Deaths","CFR")
   return(current_stats_by_state_province_df)
 }
 
@@ -91,9 +103,11 @@ get_current_stats_by_country_region <- function() {
 # Data for Trend Graph
 get_trend_data <- function(pCountry) {
   conn <-get_database_connection_string()
-  
+  pDaysBack<-14
   #RODBC
-  sql_trend_select <- paste0("EXEC [dbo].[selInfectionHumdataTrendCountry] @pCountryRegion = '",pCountry,"';")
+  p_Country <-'US'
+  sql_trend_select <- paste0("EXEC [dbo].[selInfectionHumdataTrendCountry] @pCountryRegion = '",p_Country,"',@pDaysBack = ",pDaysBack,";")
+  #sql_trend_select <- paste0("EXEC [dbo].[selInfectionHumdataTrendCountry] @pCountryRegion = '",pCountry,"';")
   trend_df <- sqlQuery(conn, sql_trend_select)
   close(conn)
   return(trend_df)
@@ -131,3 +145,25 @@ get_global_stats <- function() {
 # format(d, "%m-%d-%Y")
 
 
+
+# trend_df <- get_trend_data("US")
+# trend_df$ReportDate <- as.Date(trend_df$ReportDate)
+# 
+# predlm = lm(NewConfirmedCases ~ DaysAgo, data = trend_df)
+# predslm = predict(predlm, interval = "confidence")
+# 
+# # Make Predictions
+# pred_today<-predict(predlm, data.frame(DaysAgo = c(0)), interval = "confidence")
+# pred_tomorrow<-predict(predlm, data.frame(DaysAgo = c(-1)), interval = "confidence")
+# predslm = rbind(predslm,pred_today)
+# predslm = rbind(predslm,pred_tomorrow)
+# 
+# # Add rows for today and tomorrow
+# new_values_today <- c("US",as.character(Sys.Date()),0,NA,NA,NA,NA,NA,NA)
+# new_values_tomorrow <- c("US",as.character(Sys.Date()+1),-1,NA,NA,NA,NA,NA,NA)
+# trend_df = rbind(trend_df,new_values_today)
+# trend_df = rbind(trend_df,new_values_tomorrow)
+# 
+# # Add predictions 
+# trend_df = cbind(trend_df, predslm)
+# tail(trend_df)

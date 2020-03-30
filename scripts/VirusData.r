@@ -18,6 +18,8 @@ insert_virus_stats_daily <- function(p_row_id, p_debug=FALSE) {
   
   # Get GeographyKey
   virus_geographykey <- virus_data_df$Combined_Key[p_row_id]
+  virus_geographykey <- str_replace_all(virus_geographykey, "\\'","")
+  virus_geographykey <- str_replace_all(virus_geographykey, "\\*","")  
   virus_geographykey <- paste0("'",virus_geographykey,"'")
   
   if (p_debug) {
@@ -145,7 +147,7 @@ insert_virus_stats_daily <- function(p_row_id, p_debug=FALSE) {
 # load data
 data_load_date=Sys.Date()-1 #yesterday's date is Sys.Date-1
 days_back <- 0 # 0 is yesterday
-j <- 1
+j <- 1#1
 i <- 0
 while (i<=days_back)
 {

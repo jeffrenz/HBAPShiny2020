@@ -145,14 +145,14 @@ fluidPage(
       tabsetPanel(
         # using iframe along with tags() within tab to display pdf with scroll, height and width could be adjusted
         tabPanel("World Map",
-                 leafletOutput("map", width = "auto", height =  625),
+                 leafletOutput("map", width = "auto", height =  750),
         ),
         tabPanel("By The Numbers",
                  br(),
                  withLoader(htmlOutput("filetable"))),
         tabPanel("Trend",
                  br(),
-                withLoader(plotOutput("covid_plot_by_country",width = "800px", height = "600px"))
+                 withLoader(plotOutput("covid_plot_by_country",width = "1000px", height = "500px"))
                 ),  
         tabPanel("Situation Report (WHO)",
                   tags$iframe(style="height:625px; width:75%; scrolling=yes", 

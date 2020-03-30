@@ -20,6 +20,14 @@ library(sp)
 
 library(shinydashboard)
 library(plotly)
+library(tidyverse)
+library(extrafont)
+
+
+
+#font_import()
+# This will show more detailed information about fonts
+#fonttable()
 
 # Run functions.r script to load
 rel_path_from_root <- "scripts/Functions.r"
@@ -120,15 +128,22 @@ function(input, output, session) {
         
     selectedData <- reactive({  
       
-      current_stats_by_state_province <- get_current_stats_by_state_province()
-      current_stats_by_state_province <- current_stats_by_state_province[current_stats_by_state_province$Country_Region==input$varCounty,]
+      current_stats_by_state_province <- get_current_stats_by_state_province(input$varCounty)
+      #current_stats_by_state_province <- current_stats_by_state_province[current_stats_by_state_province$Country_Region==input$varCounty,]
       
       tmp <- HTML(
         htmlTable(current_stats_by_state_province) 
       )
-      tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
-      tmp <- gsub('<table', '<table style="width:600px"; ', tmp)
+      #tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
+      tmp <- gsub('<td', '<td ', tmp)
+      tmp <- gsub('<table', '<table style="width:800px"; ', tmp)
       tmp
+      
+      # straightforward column width adjustment
+      # calc_cro_cpct(mtcars, list(vs, am), list(total(), vs %nest% am)) %>%
+      #   htmlTable(., css.cell = c("width: 250px", # first column width
+      #                             rep("width: 50px", ncol(.) - 1)) # other columns width
+      #   )
       
       # Create the table (using table from htmlTables doc as example)
       #g1_name="Confirmed"
@@ -160,7 +175,7 @@ function(input, output, session) {
     # Get Map Data
     map_stats <- get_map_stats()
 
-    pal <- colorFactor(c("red", "orange","gray"), domain = c( "large", "medium","small"))
+    pal <- colorFactor(c("#CC0000", "#FF6600","#FF9900"), domain = c( "large", "medium","small"))
     
     ## Interactive map ###########################################
     
@@ -171,16 +186,16 @@ function(input, output, session) {
           attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'         
         ) %>%
           addCircleMarkers(
-          radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 10)),
+          radius = ~ifelse(type == "large", 25, ifelse(type == "medium", 15, 6)),
           color = ~pal(type),
           stroke = FALSE, fillOpacity = 0.5,
-          popup = ~paste(GeographyKey,"<hr>","Confirmed Cases: ", comma(ConfirmedCases), "<br/>", "Deaths: ", comma(Deaths), "<br/>", "CFR: ", CFR)
+          popup = ~paste(GeographyKey,"<br/><br/>","Confirmed Cases: ", comma(ConfirmedCases), "<br/>", "Deaths: ", comma(Deaths), "<br/>", "CFR: ", CFR)
           
         ) %>%
         setView(lng = -93.85, lat = 37.45, zoom = 5) %>%
         #setView(lng = -33.85, lat = 27.45, zoom = 3) %>%
         addLegend("bottomleft", 
-                                colors =c("gray","orange","red"),
+                                colors =c("#FF9900","#FF6600","#CC0000"),
                                 labels= c("0-100", "101-1,000","1,000+"),
                                 title= "Confirmed Cases",
                                 opacity = 1)
@@ -201,31 +216,71 @@ function(input, output, session) {
       
 
     ## plot In Trend Tab ###########################################
-    output$covid_plot_by_country <- renderPlot({
-      
-      my_image=readJPEG("www/stop_virus.jpeg")
-      
+      output$covid_plot_by_country <- renderPlot({
+      #output$covid_plot_by_country <- renderPlotly({   
+      my_image=readJPEG("www/CoronavirusChartBackground.jpg")
+      #my_image=readJPEG("www/doctors.jpg")
       sc_graph <- paste("", input$varDisplay)
-      virus_plot_title <- paste0(input$varCounty," Confirmed New Cases Last 14 Days")
+      virus_plot_title <- paste0("New Cases Last 14 Days: ",input$varCounty)
       
       # Get Data
+      pDaysAgo <-14
       trend_df <- get_trend_data(input$varCounty)
       trend_df$ReportDate <- as.Date(trend_df$ReportDate)
       
+      # Create Linear Model
+      predlm = lm(NewConfirmedCases ~ DaysAgo, data = trend_df)
+      predslm = predict(predlm, interval = "confidence")
+      
+      # Make Predictions
+      #pred_today<-predict(predlm, data.frame(DaysAgo = c(0)), interval = "confidence")
+      #pred_tomorrow<-predict(predlm, data.frame(DaysAgo = c(-1)), interval = "confidence")
+      #predslm = rbind(predslm,pred_today)
+      #predslm = rbind(predslm,pred_tomorrow)
+
+      # Add rows for today and tomorrow
+      #new_values_today <- c("US",as.character(Sys.Date()),0,NA,NA,NA,NA,NA,NA)
+      #new_values_tomorrow <- c("US",as.character(Sys.Date()+1),-1,NA,NA,NA,NA,NA,NA)
+      #trend_df = rbind(trend_df,new_values_today)
+      #trend_df = rbind(trend_df,new_values_tomorrow)
+      
+      # Add predictions 
+      trend_df = cbind(trend_df, predslm)
+      
       # Plot actual data
       par(new=TRUE)
-      p_2 <-ggplot(trend_df, aes(x = factor(ReportDate), y = NewConfirmedCases))+
+      #p_2 <-ggplot(trend_df, aes(x = factor(ReportDate), y = NewConfirmedCases))+
+      p_2 <-ggplot(trend_df, aes(x = ReportDate, y = NewConfirmedCases))+
         annotation_custom(rasterGrob(my_image, 
                                      width = unit(1,"npc"), 
                                      height = unit(1,"npc")), 
                           -Inf, Inf, -Inf, Inf) +
-        geom_bar(stat="identity", fill = "#000000", position = "dodge", width = .75, colour = 'black', alpha = 0.1) +
-        scale_y_continuous('New Cases', limits = c(0, max(trend_df$NewConfirmedCases) + max(trend_df$NewConfirmedCases)/4)) +
-        geom_text(aes(label = round(trend_df$NewConfirmedCases), ymax = 0), size = 6, fontface = 2,
-                  colour = 'black', hjust = 0.5, vjust = -1) +
+        geom_point(aes(y = fit),color="darkorange", size=3)+
+        geom_ribbon( aes(ymin = lwr, ymax = upr,fill ="Linear"), alpha = .25,linetype = 2) +
+        geom_bar(stat="identity", fill = "white", position = "dodge", width = .75, color = 'white', alpha = 0.25) +
+        scale_y_continuous('# of New Cases', limits = c(0, max(trend_df$NewConfirmedCases) + max(trend_df$NewConfirmedCases)/2)) +
+        geom_text(aes(label = comma(NewConfirmedCases)), size = 6, fontface = 2,
+                  color = 'white', hjust = 0.5, vjust = -0.5) +
         theme(axis.text.x = element_text(angle=45, hjust = 1)) +
-        theme(plot.title = element_text(hjust = 0.5))
-      p_2 <- p_2 + ggtitle(virus_plot_title) + xlab("https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases") + ylab("COVID-19 New Cases")
+        theme(plot.title = element_text(hjust = 0.0, size = 28, color = 'darkorange', face = "bold",family="Bradley Hand ITC")) +
+        theme(plot.caption = element_text(vjust = -1, hjust = 0)) +
+        theme(axis.title.x = element_text(face = "bold", vjust=-1)) +
+        theme(axis.title.y = element_text(face = "bold")) +
+        theme(text=element_text(size=16)) +
+        scale_fill_manual(values=c("darkorange","white"), name="fill") 
+        #scale_fill_manual(values=c("black"), name="color")
+      
+      p_2 <- p_2 + labs(title  = virus_plot_title,
+                           caption = "Source: https://github.com/CSSEGISandData/COVID-19",
+                           ylab = paste0("Total Cases (",input$varDisplay,")")
+                        ) 
+      p_2 <- p_2 + xlab("Report Date") + ylab("COVID-19 New Cases")
+      
+      # Format : month/year
+      p_2 <- p_2 + scale_x_date(date_breaks = "1 day",date_labels = "%B %d")
+      
+      # Using a manual scale instead of hue
+      p_2 <- p_2 + guides(fill=guide_legend(title="Prediction"))
       p_2
     }
     )   
@@ -237,15 +292,16 @@ function(input, output, session) {
       current_stats_by_country_region_df <- get_current_stats_by_country_region()
       current_stats_by_country_region_df <- head(current_stats_by_country_region_df, 10)
       
-      p_cases <- ggplot(current_stats_by_country_region_df, aes(x = reorder(current_stats_by_country_region_df$CountryOrRegion, current_stats_by_country_region_df$TotalConfirmedCases)   , y = current_stats_by_country_region_df$TotalConfirmedCases))+
+      p_cases <- ggplot(current_stats_by_country_region_df, aes(x = reorder(CountryOrRegion, TotalConfirmedCases)   , y = TotalConfirmedCases))+
         geom_bar(stat="identity", fill = "black", position = "dodge", width = .75, colour = 'black', alpha = 0.1) +
         scale_y_continuous('', limits = c(0, max(current_stats_by_country_region_df$TotalConfirmedCases) + max(current_stats_by_country_region_df$TotalConfirmedCases)/2)) +
-        geom_text(aes(label = comma(current_stats_by_country_region_df$TotalConfirmedCases), ymax = 0), size = 5, fontface = 2,
-                  colour = 'red', hjust = -0.25, vjust = 0.3) 
+        geom_text(aes(label = comma(TotalConfirmedCases), ymax = 0), size = 5, fontface = 2,
+                  colour = 'red', hjust = -0.2, vjust = 0.3) 
       
         p_cases <-  p_cases+ theme(plot.title = element_text(face = "bold"),axis.text.x = element_blank(),panel.background = element_rect(fill = "white"),plot.background = element_rect(fill = "white"),panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +labs(x = "", y = "")
       #p_cases+ theme_void()+ coord_flip()
-      p_cases + coord_flip()+ ggtitle("Total Confirmed Cases")
+        p_cases <-p_cases + coord_flip()+ ggtitle("Total Confirmed Cases")
+        p_cases
 
     })         
   })
