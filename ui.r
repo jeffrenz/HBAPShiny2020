@@ -129,6 +129,15 @@ fluidPage(
               selected = "US"),
     ),
     fluidRow(
+      # Input: Slider for the number of observations to generate ----
+      sliderInput("n",
+                  "Trend: Observations",
+                  value = 14,
+                  min = 10,
+                  max = 60)
+      
+    ),
+    fluidRow(
         withLoader(plotOutput("covid_plot_by_cases")),
     ),
     fluidRow(
@@ -149,7 +158,9 @@ fluidPage(
         ),
         tabPanel("By The Numbers",
                  br(),
-                 withLoader(htmlOutput("filetable"))),
+                 DT::dataTableOutput("current_stats_by_state_province_table")
+                 #withLoader(htmlOutput("filetable"))
+                 ),
         tabPanel("Trend",
                  br(),
                  withLoader(plotOutput("covid_plot_by_country",width = "1000px", height = "500px"))

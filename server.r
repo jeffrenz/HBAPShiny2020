@@ -24,7 +24,6 @@ library(tidyverse)
 library(extrafont)
 
 
-
 #font_import()
 # This will show more detailed information about fonts
 #fonttable()
@@ -125,6 +124,7 @@ function(input, output, session) {
     output$selected_country_table <- renderText({ 
       paste("", input$varCounty)
     })
+    
         
     selectedData <- reactive({  
       
@@ -138,39 +138,16 @@ function(input, output, session) {
       tmp <- gsub('<td', '<td ', tmp)
       tmp <- gsub('<table', '<table style="width:800px"; ', tmp)
       tmp
-      
-      # straightforward column width adjustment
-      # calc_cro_cpct(mtcars, list(vs, am), list(total(), vs %nest% am)) %>%
-      #   htmlTable(., css.cell = c("width: 250px", # first column width
-      #                             rep("width: 50px", ncol(.) - 1)) # other columns width
-      #   )
-      
-      # Create the table (using table from htmlTables doc as example)
-      #g1_name="Confirmed"
-      #g2_name="Deaths&dagger;"
-      
-      # tmp <- HTML(
-      #   htmlTable(matrix(paste("Data ", LETTERS[1:16]), 
-      #                    ncol=4, byrow = TRUE),
-      #             header =  paste(c("Total", "New",
-      #                               "Total", "New"), ""),
-      #             rnames = paste(c("Mar-13", "Mar-12",
-      #                              "Mar-13", "Mar-12"), ""),
-      #             rgroup = c("Colorado",
-      #                        "Washington"),
-      #             n.rgroup = c(2,2),
-      #             cgroup = c(g1_name, g2_name),
-      #             n.cgroup = c(2,2), 
-      #             caption="Source: http://hgis.uw.edu/virus/assets/virus.csv",
-      #             tfoot="&dagger; Placeholder") 
-      # )
-      # tmp <- gsub('<td', '<td nowrap="nowrap"; ', tmp)
-      # tmp <- gsub('<table', '<table style="width:600px"; ', tmp)
-      # tmp
-      
       })
     
+    # Render html table
     output$filetable <- renderUI({selectedData()})  
+    
+    # Render data table
+    output$current_stats_by_state_province_table = DT::renderDataTable({
+      current_stats_by_state_province <- get_current_stats_by_state_province(input$varCounty)
+      DT::datatable(current_stats_by_state_province, options = list(lengthMenu = c(15, 25, 100), pageLength = 15,orderClasses = TRUE))
+    })
     
     # Get Map Data
     map_stats <- get_map_stats()
@@ -217,15 +194,14 @@ function(input, output, session) {
 
     ## plot In Trend Tab ###########################################
       output$covid_plot_by_country <- renderPlot({
-      #output$covid_plot_by_country <- renderPlotly({   
       my_image=readJPEG("www/CoronavirusChartBackground.jpg")
       #my_image=readJPEG("www/doctors.jpg")
       sc_graph <- paste("", input$varDisplay)
-      virus_plot_title <- paste0("New Cases Last 14 Days: ",input$varCounty)
+      virus_plot_title <- paste0("New Cases Last ",input$n," Days: ",input$varCounty)
       
       # Get Data
       pDaysAgo <-14
-      trend_df <- get_trend_data(input$varCounty)
+      trend_df <- get_trend_data(input$varCounty,input$n)
       trend_df$ReportDate <- as.Date(trend_df$ReportDate)
       
       # Create Linear Model
@@ -244,6 +220,19 @@ function(input, output, session) {
       #trend_df = rbind(trend_df,new_values_today)
       #trend_df = rbind(trend_df,new_values_tomorrow)
       
+      geom_text_size <- 6
+      geom_text_angle <- 0
+      
+      if(input$n>14 & input$n<=21)
+      {
+        geom_text_size=4
+      }
+      else if(input$n>21)
+      {
+        geom_text_size=3
+        geom_text_angle=90
+      }
+      
       # Add predictions 
       trend_df = cbind(trend_df, predslm)
       
@@ -255,12 +244,12 @@ function(input, output, session) {
                                      width = unit(1,"npc"), 
                                      height = unit(1,"npc")), 
                           -Inf, Inf, -Inf, Inf) +
-        geom_point(aes(y = fit),color="darkorange", size=3)+
-        geom_ribbon( aes(ymin = lwr, ymax = upr,fill ="Linear"), alpha = .25,linetype = 2) +
+        #geom_point(aes(y = fit),color="darkorange", size=3)+
+        #geom_ribbon( aes(ymin = lwr, ymax = upr,fill ="Linear"), alpha = .25,linetype = 2) +
         geom_bar(stat="identity", fill = "white", position = "dodge", width = .75, color = 'white', alpha = 0.25) +
         scale_y_continuous('# of New Cases', limits = c(0, max(trend_df$NewConfirmedCases) + max(trend_df$NewConfirmedCases)/2)) +
-        geom_text(aes(label = comma(NewConfirmedCases)), size = 6, fontface = 2,
-                  color = 'white', hjust = 0.5, vjust = -0.5) +
+        geom_text(aes(label = if(input$n>19){round(NewConfirmedCases)} else {comma(round(NewConfirmedCases))}), size = geom_text_size, fontface = 2,
+                  color = 'white', hjust = if(input$n<=21){0.5}else{-0.25}, vjust = if(input$n<=21){-0.5} else{0},angle=geom_text_angle) +
         theme(axis.text.x = element_text(angle=45, hjust = 1)) +
         theme(plot.title = element_text(hjust = 0.0, size = 28, color = 'darkorange', face = "bold",family="Bradley Hand ITC")) +
         theme(plot.caption = element_text(vjust = -1, hjust = 0)) +
@@ -268,7 +257,6 @@ function(input, output, session) {
         theme(axis.title.y = element_text(face = "bold")) +
         theme(text=element_text(size=16)) +
         scale_fill_manual(values=c("darkorange","white"), name="fill") 
-        #scale_fill_manual(values=c("black"), name="color")
       
       p_2 <- p_2 + labs(title  = virus_plot_title,
                            caption = "Source: https://github.com/CSSEGISandData/COVID-19",
@@ -281,6 +269,11 @@ function(input, output, session) {
       
       # Using a manual scale instead of hue
       p_2 <- p_2 + guides(fill=guide_legend(title="Prediction"))
+      
+      p_2 <- p_2 + stat_smooth(
+        color = "#FC4E07", fill = "white", alpha = .15,
+        method = "loess"
+      )
       p_2
     }
     )   

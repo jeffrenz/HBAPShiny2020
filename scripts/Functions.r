@@ -81,7 +81,7 @@ get_current_stats_by_state_province <- function(pCountry) {
   conn <-get_database_connection_string()
 
   #RODBC
-  sql <- paste0("EXEC [dbo].[selInfectionHumdataCurrentTotalsForStateProvince] @pCountry = '",pCountry,"';")
+  sql <- paste0("EXEC dbo.selCurrentTotalsForStateProvince @pCountry = '",pCountry,"';")
   current_stats_by_state_province_df <- sqlQuery(conn, sql)
   close(conn)
   #keepcolumns <- c("CountryOrRegion","CityOrStateOrProvince","ConfirmedCases","Recovered","Deaths","CFR")
@@ -101,12 +101,11 @@ get_current_stats_by_country_region <- function() {
 }
 
 # Data for Trend Graph
-get_trend_data <- function(pCountry) {
+get_trend_data <- function(pCountry,pDaysBack) {
   conn <-get_database_connection_string()
-  pDaysBack<-14
   #RODBC
-  p_Country <-'US'
-  sql_trend_select <- paste0("EXEC [dbo].[selInfectionHumdataTrendCountry] @pCountryRegion = '",p_Country,"',@pDaysBack = ",pDaysBack,";")
+ 
+  sql_trend_select <- paste0("EXEC [dbo].[selInfectionHumdataTrendCountry] @pCountryRegion = '",pCountry,"',@pDaysBack = ",pDaysBack,";")
   #sql_trend_select <- paste0("EXEC [dbo].[selInfectionHumdataTrendCountry] @pCountryRegion = '",pCountry,"';")
   trend_df <- sqlQuery(conn, sql_trend_select)
   close(conn)
