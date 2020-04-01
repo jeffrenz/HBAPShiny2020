@@ -157,13 +157,15 @@ function(input, output, session) {
       DT::datatable(current_stats_by_state_province, options = list(lengthMenu = c(15, 25, 100), pageLength = 15,orderClasses = TRUE))
     })
     
+    ## Interactive map ###########################################
     # Get Map Data
     map_stats <- get_map_stats()
-
     pal <- colorFactor(c("#CC0000", "#FF6600","#FF9900"), domain = c( "large", "medium","small"))
     
-    ## Interactive map ###########################################
+    # Get New Lat and Long when changing 
+    lat_long_info <- get_lat_long_for_country(input$varCounty)
     
+    # Render map
     output$map <- renderLeaflet({
       leaflet(map_stats) %>% 
         addTiles(
@@ -177,8 +179,8 @@ function(input, output, session) {
           popup = ~paste(GeographyKey,"<br/><br/>","Confirmed Cases: ", comma(ConfirmedCases), "<br/>", "Deaths: ", comma(Deaths), "<br/>", "CFR: ", CFR)
           
         ) %>%
-        setView(lng = -93.85, lat = 37.45, zoom = 5) %>%
-        #setView(lng = -33.85, lat = 27.45, zoom = 3) %>%
+        setView(lng = lat_long_info[2]$Long, lat = lat_long_info[1]$Lat, zoom = 5) %>%
+        #setView(lng = -93.85, lat = 37.45, zoom = 5) %>%
         addLegend("bottomleft", 
                                 colors =c("#FF9900","#FF6600","#CC0000"),
                                 labels= c("0-100", "101-1,000","1,000+"),
@@ -248,8 +250,7 @@ function(input, output, session) {
       {
         interval <- round(round(max_limit/6),-3)
       }
-      
-      #virus_plot_title <- paste0("New Cases Last ",input$n," Days: ",input$varCounty, " interval: ",interval)
+
       # Plot actual data
       par(new=TRUE)
       #p_2 <-ggplot(trend_df, aes(x = factor(ReportDate), y = NewConfirmedCases))+

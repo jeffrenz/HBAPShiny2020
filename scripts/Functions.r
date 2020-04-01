@@ -24,10 +24,10 @@ library(extrafont)
 # Virus database connection string
 get_database_connection_string <- function() {
   #RODBC Windows
-  #virus_connection_string <- odbcDriverConnect('driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!;')
+  virus_connection_string <- odbcDriverConnect('driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!;')
   
   #RODBC Linux
-  virus_connection_string <-odbcDriverConnect(connection = "Driver=FreeTDS;TDS_Version=7.2;Server=lwjr.database.windows.net;Port=1433;Database=HBAP;Uid=shiny2020;Pwd=c0ronavirus_is_sc@ry!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;")
+  #virus_connection_string <-odbcDriverConnect(connection = "Driver=FreeTDS;TDS_Version=7.2;Server=lwjr.database.windows.net;Port=1433;Database=HBAP;Uid=shiny2020;Pwd=c0ronavirus_is_sc@ry!;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;")
   
   #odbc
   #virus_connection_string <- dbConnect(odbc::odbc(), .connection_string = "Driver={SQL Server};server=lwjr.database.windows.net;database=HBAP;UID=shiny2020;PWD=c0ronavirus_is_sc@ry!", timeout = 10)
@@ -90,7 +90,19 @@ get_current_stats_by_state_province <- function(pCountry) {
   return(current_stats_by_state_province_df)
 }
 
-# Get Data for Side Bar Box Plot
+# Get Lat and Long for Map
+get_lat_long_for_country <- function(pCountry) {
+  conn <-get_database_connection_string()
+  
+  #RODBC
+  sql <- paste0("EXEC dbo.selLatLongForCountry @pCountry = '",pCountry,"';")
+  lat_long_country_df <- sqlQuery(conn, sql)
+  close(conn)
+  return(lat_long_country_df)
+}
+
+
+# Get Data for Side Bar Plot
 get_current_stats_by_country_region <- function() {
   conn <-get_database_connection_string()
 
@@ -145,24 +157,3 @@ get_global_stats <- function() {
 
 
 
-# trend_df <- get_trend_data("US")
-# trend_df$ReportDate <- as.Date(trend_df$ReportDate)
-# 
-# predlm = lm(NewConfirmedCases ~ DaysAgo, data = trend_df)
-# predslm = predict(predlm, interval = "confidence")
-# 
-# # Make Predictions
-# pred_today<-predict(predlm, data.frame(DaysAgo = c(0)), interval = "confidence")
-# pred_tomorrow<-predict(predlm, data.frame(DaysAgo = c(-1)), interval = "confidence")
-# predslm = rbind(predslm,pred_today)
-# predslm = rbind(predslm,pred_tomorrow)
-# 
-# # Add rows for today and tomorrow
-# new_values_today <- c("US",as.character(Sys.Date()),0,NA,NA,NA,NA,NA,NA)
-# new_values_tomorrow <- c("US",as.character(Sys.Date()+1),-1,NA,NA,NA,NA,NA,NA)
-# trend_df = rbind(trend_df,new_values_today)
-# trend_df = rbind(trend_df,new_values_tomorrow)
-# 
-# # Add predictions 
-# trend_df = cbind(trend_df, predslm)
-# tail(trend_df)
