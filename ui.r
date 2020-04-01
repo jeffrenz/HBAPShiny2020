@@ -158,7 +158,7 @@ fluidPage(
         ),
         tabPanel("By The Numbers",
                  br(),
-                 DT::dataTableOutput("current_stats_by_state_province_table")
+                 DT::dataTableOutput("current_stats_by_state_province_table",width = "700px")
                  #withLoader(htmlOutput("filetable"))
                  ),
         tabPanel("Trend",
@@ -177,6 +177,7 @@ fluidPage(
                img(src='Coronavirus_usa_today.png', align = "left"),
                ),
         tabPanel("Why Flatten The Curve?",
+                 #htmlOutput("nytimes_iframe"),
                img(src='flattening-the-curve_orig.png', align = "left",width = "auto", height = "600px"),
       )
       

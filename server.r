@@ -38,8 +38,10 @@ global_cases <- comma(g_stats$TotalConfirmed)
 global_deaths <- comma(g_stats$TotalDeaths)
 global_recovered <- comma(g_stats$TotalRecovered)
 global_cfr <- g_stats$CFR
+
 # External URLs
-url_kinsa <<- "https://healthweather.us/"
+url_kinsa <- "https://healthweather.us/"
+url_nytimes <- "https://www.nytimes.com/interactive/2020/03/13/opinion/coronavirus-trump-response.html"
 
 #library(png) # For writePNG function
 function(input, output, session) {
@@ -103,6 +105,12 @@ function(input, output, session) {
       iframe
     })
     
+    # NY Times
+    output$nytimes_iframe <- renderUI({
+      iframe <- tags$iframe(src=url_nytimes, height=625, width="75%")
+      print(iframe)
+      iframe
+    })
     
     # Render more output
     output$text <- renderText({
@@ -177,19 +185,6 @@ function(input, output, session) {
                                 title= "Confirmed Cases",
                                 opacity = 1)
     })
-    
-
-    output$over_nutrient <- renderValueBox({
-      # nutrition_df <- dv_df() %>% 
-      #   # filter(NutrientID %in% c(601, 204, 307, 269, 0)) %>% 
-      #   tidyr::drop_na(pct_dv) %>% filter(pct_dv > 100)
-      # if(nrow(nutrition_df) > 0){
-      #   valueBox("Over Daily Value", HTML(paste0(nutrition_df$Nutrient, sep="<br>")), icon = icon("exclamation-triangle"), color = "red")
-      # } else {
-      #   valueBox("All nutrients", "below recommended DV", icon = icon("exclamation-triangle"), color = "green")
-      # }
-      valueBox("All nutrients", "below recommended DV", icon = icon("exclamation-triangle"), color = "green", width=5)
-    })
       
 
     ## plot In Trend Tab ###########################################
@@ -236,6 +231,25 @@ function(input, output, session) {
       # Add predictions 
       trend_df = cbind(trend_df, predslm)
       
+      # Get Status
+      max_value <- max(trend_df$NewConfirmedCases)
+      max_limit <- round((max_value+max_value/2))
+      interval <- round(max_limit/6)
+      i = -1
+      if (max_value/6< 100)
+      {
+        interval <- round(round(max_limit/6),-1)
+      }
+      else if (max_value/6>= 100 & max_value/6< 1000)
+      {
+        interval <- round(round(max_limit/6),-2)
+      }
+      else if (max_value/6>= 1000 & max_value/6< 100000)
+      {
+        interval <- round(round(max_limit/6),-3)
+      }
+      
+      #virus_plot_title <- paste0("New Cases Last ",input$n," Days: ",input$varCounty, " interval: ",interval)
       # Plot actual data
       par(new=TRUE)
       #p_2 <-ggplot(trend_df, aes(x = factor(ReportDate), y = NewConfirmedCases))+
@@ -247,7 +261,10 @@ function(input, output, session) {
         #geom_point(aes(y = fit),color="darkorange", size=3)+
         #geom_ribbon( aes(ymin = lwr, ymax = upr,fill ="Linear"), alpha = .25,linetype = 2) +
         geom_bar(stat="identity", fill = "white", position = "dodge", width = .75, color = 'white', alpha = 0.25) +
-        scale_y_continuous('# of New Cases', limits = c(0, max(trend_df$NewConfirmedCases) + max(trend_df$NewConfirmedCases)/2)) +
+        scale_y_continuous('# of New Cases'
+                           , label=comma
+                           , breaks = seq(0,max_limit,interval)
+                           , limits = c(0, max_limit)) +
         geom_text(aes(label = if(input$n>19){round(NewConfirmedCases)} else {comma(round(NewConfirmedCases))}), size = geom_text_size, fontface = 2,
                   color = 'white', hjust = if(input$n<=21){0.5}else{-0.25}, vjust = if(input$n<=21){-0.5} else{0},angle=geom_text_angle) +
         theme(axis.text.x = element_text(angle=45, hjust = 1)) +
