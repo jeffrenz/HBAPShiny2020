@@ -192,7 +192,6 @@ function(input, output, session) {
     ## plot In Trend Tab ###########################################
       output$covid_plot_by_country <- renderPlot({
       my_image=readJPEG("www/CoronavirusChartBackground.jpg")
-      #my_image=readJPEG("www/doctors.jpg")
       sc_graph <- paste("", input$varDisplay)
       virus_plot_title <- paste0("New Cases Last ",input$n," Days: ",input$varCounty)
       

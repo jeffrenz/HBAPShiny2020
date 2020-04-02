@@ -72,17 +72,17 @@ fluidPage(
                ),
              ),
       ),      
-      column(5,
+      column(4,
              fluidRow(
                textOutput("selected_country_total"),
                tags$style(type="text/css", "#selected_country_total {font-family: 'Bradley Hand ITC'; font-size:50px;font-weight: bold;color:darkorange}"),
              ),
              fluidRow
              (
-                 column(1,
-                        img(src='emoji-surgical-mask.png', align = "right", width="50px")
-                 ),
-                 column(1,
+               column(1,
+                      img(src='emoji-surgical-mask.png', align = "right", width="50px")
+                      ),
+               column(1,
                        fluidRow(
                        textOutput("country_cases_total"),
                        tags$style(type="text/css", "#country_cases_total {font-family: 'times'; font-size:28px;color:black}"),
@@ -91,9 +91,6 @@ fluidPage(
                        p("Cases", style = "font-family: 'times'; font-size:12px;color:black"),
                         ),
                        ),
-               # column(1,offset = 1,
-               #        img(src='death.png', align = "right", width = "50px")
-               # ),
                column(1,offset = 1,
                       fluidRow(
                         textOutput("country_deaths_total"),
@@ -102,10 +99,7 @@ fluidPage(
                       fluidRow(
                         p("Deaths", style = "font-family: 'times'; font-size:12px;color:red"),
                       ),
-               ),               
-                 # column(1,offset = 1,
-                 #        img(src='percent.jpg', align = "right", width="50px")
-                 # ),
+               ),
                  column(1,offset = 1,
                         fluidRow(
                           textOutput("country_recovered_cfr"),
@@ -114,11 +108,30 @@ fluidPage(
                         fluidRow(
                           p("CFR", style = "font-family: 'times'; font-size:12px;color:black"),
                         ),
-                 ),
-
-          ),
+                        ),
+               ),
+             ),
+      column(2,
+             fluidRow(
+               h4("HBAP Team Shiny"),),
+             fluidRow(
+               column(3,
+                      fluidRow(
+               img(src='HBAP.jpg', align = "left",width = "75px", height = "auto"),
+               ),
+               ),
+               column(4,
+               fluidRow(       
+               h6("Jeff Renz",
+                  br(),
+                  "Itauma Itauma",
+                  br(),
+                  "Ken Cutt")
+               ),
+               ),
+             ),
+             ),
       ),
-    ),
   ),
 
   sidebarPanel(
@@ -142,10 +155,7 @@ fluidPage(
     ),
     fluidRow(
       br(),
-    wellPanel(
-      h4("HBAP Team Shiny"),
-      h6("Jeff Renz, Itauma Itauma and Ken Cutt")
-    ),
+
     )
   , width=2),
     
