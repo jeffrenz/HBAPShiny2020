@@ -33,11 +33,16 @@ rel_path_from_root <- "scripts/Functions.r"
 source(rel_path_from_root)
 
 # Global Stats
-g_stats <- get_global_stats()
-global_cases <- comma(g_stats$TotalConfirmed)
-global_deaths <- comma(g_stats$TotalDeaths)
-global_recovered <- comma(g_stats$TotalRecovered)
-global_cfr <- g_stats$CFR
+global_cases_df <- get_global_stats()
+global_cases <- comma(global_cases_df$TotalConfirmed)
+global_deaths <- comma(global_cases_df$TotalDeaths)
+global_recovered <- comma(global_cases_df$TotalRecovered)
+global_cfr <- global_cases_df$CFR
+global_reportdate <-global_cases_df$ReportDate
+
+# Get Data For Global Trend
+current_stats_by_country_region_df <- get_current_stats_by_country_region()
+current_stats_by_country_region_df <- head(current_stats_by_country_region_df, 10)
 
 # External URLs
 url_kinsa <- "https://healthweather.us/"
@@ -45,52 +50,61 @@ url_nytimes <- "https://www.nytimes.com/interactive/2020/03/13/opinion/coronavir
 
 #library(png) # For writePNG function
 function(input, output, session) {
-   
   observe({
 
+    
     # global Totals
     output$global_header <- renderText({
       "World Wide"
     })
     output$global_cases <- renderText({ 
-      global_cases_df <-get_global_stats()
+      #global_cases_df <-get_global_stats()
       paste("", comma(global_cases_df$TotalConfirmed))
     })
     output$global_deaths <- renderText({ 
-      global_cases_df <-get_global_stats()
+      #global_cases_df <-get_global_stats()
       paste("", comma(global_cases_df$TotalDeaths))
     })
     output$global_cfr <- renderText({ 
-      global_cases_df <-get_global_stats()
+      #global_cases_df <-get_global_stats()
       paste("", global_cases_df$CFR)
     })    
     output$global_recovered <- renderText({ 
-      global_cases_df <-get_global_stats()
+      #global_cases_df <-get_global_stats()
       paste("", comma(global_cases_df$TotalRecovered))
     })
+    output$global_reportdate <- renderText({ 
+      paste("Last Updated: ", global_cases_df$ReportDate)
+    })
+
     
+    # Get updated totals by country
+    totals_for_country <- reactive({
+      df <- get_current_totals_for_country(input$varCounty)
+      return(df)
+    })
     
+    totals_for_country_df <- totals_for_country()
     # Country Virus Totals
     output$country_cases_total <- renderText({ 
-      totals_for_country_df <-get_current_totals_for_country(input$varCounty)
+      #totals_for_country_df <-get_current_totals_for_country(input$varCounty)
       paste("", comma(totals_for_country_df$TotalConfirmedCases))
     })
     output$country_deaths_total <- renderText({ 
-      totals_for_country_df <-get_current_totals_for_country(input$varCounty)
+      #totals_for_country_df <-get_current_totals_for_country(input$varCounty)
       paste("", comma(totals_for_country_df$TotalDeaths))
     })
     output$country_recovered_total <- renderText({ 
-      totals_for_country_df <-get_current_totals_for_country(input$varCounty)
+      #totals_for_country_df <-get_current_totals_for_country(input$varCounty)
       paste("", comma(totals_for_country_df$TotalRecovered))
     })
     output$country_recovered_cfr <- renderText({ 
-      totals_for_country_df <-get_current_totals_for_country(input$varCounty)
+      #totals_for_country_df <-get_current_totals_for_country(input$varCounty)
       paste("", totals_for_country_df$CFR)
     })    
     output$selected_country_total <- renderText({ 
       paste("", input$varCounty)
     })
-    
     
     # WHO Situtaion Report Name
     output$situation_report_name <- renderText({ 
@@ -298,10 +312,6 @@ function(input, output, session) {
     ## Side Bar Vertical Plot ###########################################
     output$covid_plot_by_cases <- renderPlot({
       
-      # Get Data
-      current_stats_by_country_region_df <- get_current_stats_by_country_region()
-      current_stats_by_country_region_df <- head(current_stats_by_country_region_df, 10)
-      
       p_cases <- ggplot(current_stats_by_country_region_df, aes(x = reorder(CountryOrRegion, TotalConfirmedCases)   , y = TotalConfirmedCases))+
         geom_bar(stat="identity", fill = "black", position = "dodge", width = .75, colour = 'black', alpha = 0.1) +
         scale_y_continuous('', limits = c(0, max(current_stats_by_country_region_df$TotalConfirmedCases) + max(current_stats_by_country_region_df$TotalConfirmedCases)/2)) +
@@ -309,7 +319,6 @@ function(input, output, session) {
                   colour = 'red', hjust = -0.2, vjust = 0.3) 
       
         p_cases <-  p_cases+ theme(plot.title = element_text(face = "bold"),axis.text.x = element_blank(),panel.background = element_rect(fill = "white"),plot.background = element_rect(fill = "white"),panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +labs(x = "", y = "")
-      #p_cases+ theme_void()+ coord_flip()
         p_cases <-p_cases + coord_flip()+ ggtitle("Total Confirmed Cases")
         p_cases
 
