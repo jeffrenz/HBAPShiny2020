@@ -10,4 +10,4 @@ There is a sortable data grid that provides totals by state. The dashboard also 
 [HBAP COVID-19 Shiny Dashboard](https://jeff-renz.shinyapps.io/HBAPShiny2020/)
 
 
-[![HBAP COVID-19 Shiny Dashboard Overview]({https://github.com/jeffrenz/HBAPShiny2020/blob/readme/www/ShinyDashboard.PNG})]({https://youtu.be/ztGZAzf-BFo} "HBAP COVID-19 Shiny Dashboard Overview")
+[![HBAP COVID-19 Shiny Dashboard Overview](http://img.youtube.com/vi/ztGZAzf-BFo/0.jpg)](http://www.youtube.com/watch?v=ztGZAzf-BFo "HBAP COVID-19 Shiny Dashboard Overview")
