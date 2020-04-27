@@ -8,3 +8,6 @@ The Dashboard is updated daily show global and the selected county totals pullin
 There is a sortable data grid that provides totals by state. The dashboard also shows related information from other sites such as pdfs, videos, and interactive maps.
 
 [HBAP COVID-19 Shiny Dashboard](https://jeff-renz.shinyapps.io/HBAPShiny2020/)
+
+
+[![HBAP COVID-19 Shiny Dashboard Overview]({https://github.com/jeffrenz/HBAPShiny2020/blob/readme/www/ShinyDashboard.PNG})]({https://youtu.be/ztGZAzf-BFo} "HBAP COVID-19 Shiny Dashboard Overview")
